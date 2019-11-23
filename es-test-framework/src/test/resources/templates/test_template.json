@@ -1,0 +1,11 @@
+{
+  "index_patterns": [
+    "order-*"
+  ],
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+   
+  }
+}

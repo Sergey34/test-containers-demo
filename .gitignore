@@ -1,0 +1,6 @@
+
+# Project exclude paths
+/es-test-examples/separated-step/target/
+/es-test-examples/simple-es-test/target/
+/es-test-examples/spring-es-test/target/
+/es-test-framework/target/
