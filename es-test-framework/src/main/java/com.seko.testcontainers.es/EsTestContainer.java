@@ -26,15 +26,15 @@ import java.util.List;
 import java.util.Map;
 
 public class EsTestContainer extends ElasticsearchContainer {
-    private static final Gson gson = new Gson();
-    private static final Type esDocMapType = new TypeToken<Map<String, Object>>() {
-    }.getType();
     public static final String DOCKER_ELASTIC_DEFAULT = "docker.elastic.co/elasticsearch/elasticsearch-oss:6.4.3";
     public static final String DEFAULT_INDEX_TEMPLATE_PATH = "./templates";
     public static final String CONTAINER_NAME = "CONTAINER_NAME";
     public static final String INDEX_TEMPLATE_PATH_CONFIG = "INDEX_TEMPLATE_PATH";
-    private static final String DEFAULT_DATA_PATH = "./data";
     public static final String DATA_PATH_CONFIG = "DATA_PATH";
+    private static final Gson gson = new Gson();
+    private static final Type esDocMapType = new TypeToken<Map<String, Object>>() {
+    }.getType();
+    private static final String DEFAULT_DATA_PATH = "./data";
     private RestHighLevelClient client;
     private BulkProcessor bp;
 

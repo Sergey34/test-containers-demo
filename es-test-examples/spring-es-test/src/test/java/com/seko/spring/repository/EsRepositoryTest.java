@@ -10,7 +10,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
