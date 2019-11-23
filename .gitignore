@@ -4,3 +4,14 @@
 /es-test-examples/simple-es-test/target/
 /es-test-examples/spring-es-test/target/
 /es-test-framework/target/
+.idea/
+es-test-examples/es-test-examples.iml
+es-test-examples/separated-step/separated-step.iml
+es-test-examples/separated-step/src/main/resources/
+es-test-examples/simple-es-test/simple-es-test.iml
+es-test-examples/simple-es-test/src/main/resources/
+es-test-examples/spring-es-test/spring-es-test.iml
+es-test-examples/spring-es-test/src/main/resources/
+es-test-framework/es-test-framework.iml
+es-test-framework/src/main/resources/
+test-container-demo.iml
