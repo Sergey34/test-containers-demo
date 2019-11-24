@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRequest;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -25,9 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class EsTestContainer extends ElasticsearchContainer {
-    public static final String DOCKER_ELASTIC_DEFAULT = "docker.elastic.co/elasticsearch/elasticsearch-oss:6.4.3";
-    public static final String DEFAULT_INDEX_TEMPLATE_PATH = "./templates";
+    private static final String DEFAULT_DOCKER_ELASTIC = "docker.elastic.co/elasticsearch/elasticsearch-oss:6.4.3";
+    private static final String DEFAULT_INDEX_TEMPLATE_PATH = "./templates";
     public static final String CONTAINER_NAME = "CONTAINER_NAME";
     public static final String INDEX_TEMPLATE_PATH_CONFIG = "INDEX_TEMPLATE_PATH";
     public static final String DATA_PATH_CONFIG = "DATA_PATH";
@@ -46,8 +48,8 @@ public class EsTestContainer extends ElasticsearchContainer {
         super(dockerImageName);
     }
 
-    public static String getImageName() {
-        return System.getProperty(CONTAINER_NAME, DOCKER_ELASTIC_DEFAULT);
+    private static String getImageName() {
+        return System.getProperty(CONTAINER_NAME, DEFAULT_DOCKER_ELASTIC);
     }
 
     public RestHighLevelClient getClient() {
@@ -147,7 +149,7 @@ public class EsTestContainer extends ElasticsearchContainer {
         }
         List<File> result = new ArrayList<>();
         File[] files = dir.listFiles();
-        for (File file : files) {
+        for (File file : files != null ? files : new File[0]) {
             if (file.isDirectory()) {
                 result.addAll(loadFiles(file));
             } else {
@@ -180,7 +182,10 @@ public class EsTestContainer extends ElasticsearchContainer {
 
     private IndexRequest getRequest(String jsonDoc) {
         Map<String, Object> map = gson.fromJson(jsonDoc, esDocMapType);
-        IndexRequest request = new IndexRequest(map.get("_index").toString(), map.get("_type").toString(), map.get("_id").toString());
+        String index = map.get("_index").toString();
+        String type = map.get("_type").toString();
+        String id = map.get("_id").toString();
+        IndexRequest request = new IndexRequest(index, type, id);
         request.source((Map) map.get("_source"));
         return request;
     }
@@ -188,5 +193,14 @@ public class EsTestContainer extends ElasticsearchContainer {
     public void uploadAll() {
         uploadIndexTemplates();
         uploadData();
+    }
+
+    public void refresh(String... indexes) {
+        RefreshRequest request = new RefreshRequest(indexes);
+        try {
+            getClient().indices().refresh(request, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
