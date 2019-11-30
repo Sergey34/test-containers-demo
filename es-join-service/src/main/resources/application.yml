@@ -1,8 +1,13 @@
 spring:
   elasticsearch:
     rest:
-      uris: http://localhost:32928
+      uris: http://localhost:32934
 #      password: "password"
 #      username: "username"
 
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+#http://localhost:8080/actuator/metrics
