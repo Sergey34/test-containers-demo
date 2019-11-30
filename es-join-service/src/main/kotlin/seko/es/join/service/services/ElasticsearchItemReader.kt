@@ -38,10 +38,11 @@ class ElasticsearchItemReader(
     }
 
     override fun doClose() {
-        if (scrollId!= null) {
+        if (scrollId != null) {
             val clearScrollRequest = ClearScrollRequest()
             clearScrollRequest.addScrollId(scrollId)
             restHighLevelClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
+            scrollId = null
         }
     }
 }
