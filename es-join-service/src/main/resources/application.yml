@@ -1,0 +1,8 @@
+spring:
+  elasticsearch:
+    rest:
+      uris: http://localhost:32928
+#      password: "password"
+#      username: "username"
+
+
