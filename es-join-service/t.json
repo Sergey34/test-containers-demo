@@ -21,6 +21,10 @@
           "related_sales_order"
         ],
         "query": "{\"match_all\": {}}",
+        "order": {
+          "field": "@timestamp",
+          "type": "ASC"
+        },
         "script_fields": [
           {
             "field_name": "field_1",
