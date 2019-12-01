@@ -3,7 +3,7 @@
     "job_id": "1",
     "job_name": "name",
     "job_description": "erqweq",
-    "schedule": "0 * * * dsdfsd* ?",
+    "schedule": "0 * * * * ?",
     "global_config": {
       "target_index": "window",
       "rotation_target_index_type": "DAILY",
