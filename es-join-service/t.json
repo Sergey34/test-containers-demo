@@ -1,126 +1,128 @@
-{
-  "job_id": "1",
-  "job_name": "name",
-  "job_description": "erqweq",
-  "global_config": {
+[
+  {
+    "job_id": "1",
+    "job_name": "name",
+    "job_description": "erqweq",
     "schedule": "0 * * * * ?",
-    "target_index": "window",
-    "rotation_target_index_type": "date",
-    "rotation_target_index_date_format": "YYYY-MM"
-  },
-  "steps": [
-    {
-      "id": "errors",
-      "chunkSize": 100,
-      "reader": {
-        "type": "es",
-        "index": "error*",
-        "fields": [
-          "id",
-          "code",
-          "related_sales_order"
-        ],
-        "query": "{\"match_all\": {}}",
-        "order": {
-          "field": "@timestamp",
-          "type": "ASC"
-        },
-        "script_fields": [
-          {
-            "field_name": "field_1",
-            "script": {
-              "lang": "painless",
-              "source": "doc['price'].value * 2 * params.factor",
-              "params": "{\"factor\": 2.0}"
-            }
-          }
-        ]
-      },
-      "processor": {
-        "type": "groovy",
-        "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
-      },
-      "writer": {
-        "type": "update",
-        "index": "window",
-        "rotation_type": "date",
-        "rotation_date_format": "YYYY-MM",
-        "target_field": "target_field"
-      }
+    "global_config": {
+      "target_index": "window",
+      "rotation_target_index_type": "date",
+      "rotation_target_index_date_format": "YYYY-MM"
     },
-    {
-      "id": "orders",
-      "chunkSize": 100,
-      "reader": {
-        "type": "es",
-        "index": "order*",
-        "fields": [
-          "id",
-          "name"
-        ],
-        "query": "{\"match_all\": {}}",
-        "script_fields": [
-          {
-            "field_name": "field_1",
-            "script": {
-              "lang": "painless",
-              "source": "doc['price'].value * 2 * params.factor",
-              "params": "{\"factor\": 2.0}"
+    "steps": [
+      {
+        "id": "errors",
+        "chunkSize": 100,
+        "reader": {
+          "type": "es",
+          "index": "error*",
+          "fields": [
+            "id",
+            "code",
+            "related_sales_order"
+          ],
+          "query": "{\"match_all\": {}}",
+          "order": {
+            "field": "@timestamp",
+            "type": "ASC"
+          },
+          "script_fields": [
+            {
+              "field_name": "field_1",
+              "script": {
+                "lang": "painless",
+                "source": "doc['price'].value * 2 * params.factor",
+                "params": "{\"factor\": 2.0}"
+              }
             }
+          ]
+        },
+        "processor": {
+          "type": "groovy",
+          "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
+        },
+        "writer": {
+          "type": "update",
+          "index": "window",
+          "rotation_type": "date",
+          "rotation_date_format": "YYYY-MM",
+          "target_field": "target_field"
+        }
+      },
+      {
+        "id": "orders",
+        "chunkSize": 100,
+        "reader": {
+          "type": "es",
+          "index": "order*",
+          "fields": [
+            "id",
+            "name"
+          ],
+          "query": "{\"match_all\": {}}",
+          "script_fields": [
+            {
+              "field_name": "field_1",
+              "script": {
+                "lang": "painless",
+                "source": "doc['price'].value * 2 * params.factor",
+                "params": "{\"factor\": 2.0}"
+              }
+            }
+          ]
+        },
+        "processor": {
+          "type": "groovy",
+          "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
+        },
+        "writer": {
+          "type": "updateByScript",
+          "script": {
+            "lang": "painless",
+            "source": "doc['price'].value * 2 * params.factor",
+            "params": "{\"factor\": 2.0}"
           }
-        ]
+        }
       },
-      "processor": {
-        "type": "groovy",
-        "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
-      },
-      "writer": {
-        "type": "updateByScript",
-        "script": {
-          "lang": "painless",
-          "source": "doc['price'].value * 2 * params.factor",
-          "params": "{\"factor\": 2.0}"
+      {
+        "id": "tasks",
+        "chunkSize": 100,
+        "reader": {
+          "type": "es",
+          "index": "task*",
+          "fields": [
+            "id",
+            "name"
+          ],
+          "query": "{\"match_all\": {}}",
+          "script_fields": [
+            {
+              "field_name": "field_1",
+              "script": {
+                "lang": "painless",
+                "source": "doc['price'].value * 2 * params.factor",
+                "params": "{\"factor\": 2.0}"
+              }
+            }
+          ]
+        },
+        "processor": {
+          "type": "groovy",
+          "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
+        },
+        "writer": {
+          "type": "updateByQuery",
+          "query": "{\"match_all\": {}}",
+          "script": {
+            "source": "ctx._source.likes++",
+            "lang": "painless"
+          },
+          "scroll_size": 1000,
+          "routing": 1000,
+          "slices": 5,
+          "conflicts": "proceed"
         }
       }
-    },
-    {
-      "id": "tasks",
-      "chunkSize": 100,
-      "reader": {
-        "type": "es",
-        "index": "task*",
-        "fields": [
-          "id",
-          "name"
-        ],
-        "query": "{\"match_all\": {}}",
-        "script_fields": [
-          {
-            "field_name": "field_1",
-            "script": {
-              "lang": "painless",
-              "source": "doc['price'].value * 2 * params.factor",
-              "params": "{\"factor\": 2.0}"
-            }
-          }
-        ]
-      },
-      "processor": {
-        "type": "groovy",
-        "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
-      },
-      "writer": {
-        "type": "updateByQuery",
-        "query": "{\"match_all\": {}}",
-        "script": {
-          "source": "ctx._source.likes++",
-          "lang": "painless"
-        },
-        "scroll_size": 1000,
-        "routing": 1000,
-        "slices": 5,
-        "conflicts": "proceed"
-      }
-    }
-  ]
-}
+    ]
+  }
+]
