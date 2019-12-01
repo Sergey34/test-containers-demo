@@ -9,6 +9,9 @@ spring:
     wait-for-jobs-to-complete-on-shutdown: true
     scheduler-name: namespase-joun
     job-store-type: memory
+    properties:
+      org.quartz.threadPool:
+        threadCount: 2
 
 
 management:
