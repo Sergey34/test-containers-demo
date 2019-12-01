@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import seko.es.join.service.domain.JobConfig
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.jobs.JoinJob
 
@@ -38,38 +39,38 @@ class JoinService @Autowired constructor(
             }
     }
 
-    private fun buildTrigger(jobConfig: Map<String, Any>): CronTrigger {
+    private fun buildTrigger(jobConfig: JobConfig): CronTrigger {
         return TriggerBuilder
             .newTrigger()
-            .withIdentity(jobConfig["job_id"] as String, "namespace")
+            .withIdentity(jobConfig.jobId, "namespace")
             .withSchedule(
-                CronScheduleBuilder.cronSchedule(jobConfig["schedule"] as String)
+                CronScheduleBuilder.cronSchedule(jobConfig.schedule)
             )
             .build()
     }
 
-    private fun buildJobDetail(jobConfig: Map<String, Any>): JobDetail {
+    private fun buildJobDetail(jobConfig: JobConfig): JobDetail {
         val jobDataMap = JobDataMap()
         jobDataMap["config"] = jobConfig
         jobDataMap["jobParams"] = createJobParams(jobConfig)
         jobDataMap["job"] = getJob(jobConfig)
 
         return JobBuilder.newJob(JoinJob::class.java)
-            .withIdentity(jobConfig["job_id"] as String, "namespace")
-            .withDescription(jobConfig["job_description"] as String)
+            .withIdentity(jobConfig.jobId, "namespace")
+            .withDescription(jobConfig.jobDescription)
             .usingJobData(jobDataMap)
             .storeDurably()
             .build()
     }
 
-    private fun createJobParams(jobConfig: Map<String, Any>): JobParameters {
+    private fun createJobParams(jobConfig: JobConfig): JobParameters {
         return JobParametersBuilder()
-            .addString(jobConfig["job_id"] as String, System.currentTimeMillis().toString())
+            .addString("JobID", jobConfig.jobId)
             .toJobParameters()
     }
 
-    private fun getJob(jobConfig: Map<String, Any>): Job {
-        val jb = jobs[jobConfig["job_id"] as String]
+    private fun getJob(jobConfig: JobConfig): Job {
+        val jb = jobs[jobConfig.jobId]
             .incrementer(RunIdIncrementer())
         val steps: List<Step> = createSteps(jobConfig)
         val jobWithStep = jb.start(steps.first())
@@ -83,15 +84,15 @@ class JoinService @Autowired constructor(
         return jobWithStep.build()
     }
 
-    private fun createSteps(jobConfig: Map<String, Any>): List<TaskletStep> {
-        val stepsConfig = jobConfig["steps"] as List<Map<String, Any>>
+    private fun createSteps(jobConfig: JobConfig): List<TaskletStep> {
+        val stepsConfig = jobConfig.steps
         return stepsConfig.map {
             val reader = createReader(it)
             val processor = createProcessor(it)
             val writer = createWriter(it)
-            val chunkSize = (it["chunkSize"] as Double).toInt()
+            val chunkSize = it.chunkSize
 
-            val sb = stepBuilderFactory[it["id"] as String]
+            val sb = stepBuilderFactory[it.id]
                 .chunk<Map<*, *>, Map<*, *>>(chunkSize)
                 .reader(reader)
 
@@ -103,18 +104,18 @@ class JoinService @Autowired constructor(
         }
     }
 
-    private fun createWriter(config: Map<String, Any>): EsItemWriter {
-        val writerConfig = config["writer"] as Map<String, Any>
+    private fun createWriter(config: seko.es.join.service.domain.Step): EsItemWriter {
+        val writerConfig = config.writer
         return EsItemWriter(restHighLevelClient)
     }
 
-    private fun createProcessor(config: Map<String, Any>): ItemProcessor<Map<*, *>, Map<*, *>>? {
-        val processorConfig = config["processor"] as Map<String, Any>
+    private fun createProcessor(config: seko.es.join.service.domain.Step): ItemProcessor<Map<*, *>, Map<*, *>>? {
+        val processorConfig = config.processor
         return null
     }
 
-    private fun createReader(config: Map<String, Any>): ElasticsearchItemReader {
-        val readerConfig = config["reader"] as Map<String, Any>
+    private fun createReader(config: seko.es.join.service.domain.Step): ElasticsearchItemReader {
+        val readerConfig = config.reader
         val searchRequest = SearchRequest("my_index")
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.query(QueryBuilders.matchAllQuery())

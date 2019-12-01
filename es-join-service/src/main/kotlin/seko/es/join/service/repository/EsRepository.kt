@@ -1,18 +1,21 @@
 package seko.es.join.service.repository
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import seko.es.join.service.domain.JobConfig
 import java.io.File
-import java.lang.reflect.Type
 
 @Repository
 class EsRepository @Autowired constructor(private val restHighLevelClient: RestHighLevelClient) {
-    fun getJobs(): List<Map<String, Any>> {
-        val empMapType: Type = object : TypeToken<List<Map<String, Any>>>() {}.type
-        return Gson().fromJson<List<Map<String, Any>>>(File("es-join-service/t.json").reader(), empMapType)
+    private val mapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule()) //let Jackson know about Kotlin
+
+    fun getJobs(): List<JobConfig> {
+        val jobs = mapper.readValue<List<JobConfig>>(File("es-join-service/t.json").reader())
+        return jobs
     }
 
 }

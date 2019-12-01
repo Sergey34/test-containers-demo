@@ -3,10 +3,10 @@
     "job_id": "1",
     "job_name": "name",
     "job_description": "erqweq",
-    "schedule": "0 * * * * ?",
+    "schedule": "0 * * * dsdfsd* ?",
     "global_config": {
       "target_index": "window",
-      "rotation_target_index_type": "date",
+      "rotation_target_index_type": "DAILY",
       "rotation_target_index_date_format": "YYYY-MM"
     },
     "steps": [
@@ -14,7 +14,7 @@
         "id": "errors",
         "chunkSize": 100,
         "reader": {
-          "type": "es",
+          "type": "ES_SCROLL",
           "index": "error*",
           "fields": [
             "id",
@@ -24,7 +24,7 @@
           "query": "{\"match_all\": {}}",
           "order": {
             "field": "@timestamp",
-            "type": "ASC"
+            "type": "ASK"
           },
           "script_fields": [
             {
@@ -38,14 +38,12 @@
           ]
         },
         "processor": {
-          "type": "groovy",
+          "type": "GROOVY",
           "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
         },
         "writer": {
-          "type": "update",
-          "index": "window",
-          "rotation_type": "date",
-          "rotation_date_format": "YYYY-MM",
+          "type": "UPDATE",
+          "id": "id",
           "target_field": "target_field"
         }
       },
@@ -53,7 +51,7 @@
         "id": "orders",
         "chunkSize": 100,
         "reader": {
-          "type": "es",
+          "type": "ES_SCROLL",
           "index": "order*",
           "fields": [
             "id",
@@ -72,11 +70,11 @@
           ]
         },
         "processor": {
-          "type": "groovy",
+          "type": "GROOVY",
           "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
         },
         "writer": {
-          "type": "updateByScript",
+          "type": "UPDATE_BY_SCRIPT",
           "script": {
             "lang": "painless",
             "source": "doc['price'].value * 2 * params.factor",
@@ -88,7 +86,7 @@
         "id": "tasks",
         "chunkSize": 100,
         "reader": {
-          "type": "es",
+          "type": "ES_SCROLL",
           "index": "task*",
           "fields": [
             "id",
@@ -107,11 +105,11 @@
           ]
         },
         "processor": {
-          "type": "groovy",
+          "type": "GROOVY",
           "script": "source.status = source.status_history.find {it.status in ['actual', 'handling']}"
         },
         "writer": {
-          "type": "updateByQuery",
+          "type": "UPDATE_BY_QUERY",
           "query": "{\"match_all\": {}}",
           "script": {
             "source": "ctx._source.likes++",
