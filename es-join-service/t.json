@@ -24,7 +24,7 @@
           "query": "{\"match_all\": {}}",
           "order": {
             "field": "@timestamp",
-            "type": "ASK"
+            "type": "ASC"
           },
           "script_fields": [
             {

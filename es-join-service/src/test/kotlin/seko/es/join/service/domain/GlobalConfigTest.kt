@@ -7,11 +7,11 @@ import org.junit.Assert
 import org.junit.Test
 
 class GlobalConfigTest {
-    private val mapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule()) //let Jackson know about Kotlin
+    private val mapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
 
     @Test
-    fun testJsonFormat(): Unit {
+    fun testJsonFormat() {
         val config = mapper.readValue<GlobalConfig>(
             """{
       "target_index": "window",
@@ -23,7 +23,7 @@ class GlobalConfigTest {
     }
 
     @Test
-    fun testJsonFormatWithoutRotation(): Unit {
+    fun testJsonFormatWithoutRotation() {
         val config = mapper.readValue<GlobalConfig>(
             """{
       "target_index": "window"
@@ -33,7 +33,7 @@ class GlobalConfigTest {
     }
 
     @Test
-    fun testJsonFormatWithoutFormat(): Unit {
+    fun testJsonFormatWithoutFormat() {
         val config = mapper.readValue<GlobalConfig>(
             """
     {

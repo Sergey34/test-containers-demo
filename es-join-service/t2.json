@@ -1,0 +1,26 @@
+[
+  {
+    "job_id": "1",
+    "job_name": "name",
+    "job_description": "erqweq",
+    "schedule": "0 * * * * ?",
+    "global_config": {
+      "target_index": "window"
+    },
+    "steps": [
+      {
+        "id": "errors",
+        "chunkSize": 100,
+        "reader": {
+          "type": "ES_SCROLL",
+          "index": "my_index",
+          "query": "{\"match_all\": {}}"
+        },
+        "writer": {
+          "type": "UPDATE",
+          "id": "field_1"
+        }
+      }
+    ]
+  }
+]

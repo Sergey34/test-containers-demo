@@ -1,7 +1,7 @@
 spring:
   elasticsearch:
     rest:
-      uris: http://localhost:32940
+      uris: http://localhost:32943
     #      password: "password"
     #      username: "username"
   quartz:

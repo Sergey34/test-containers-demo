@@ -15,5 +15,5 @@ data class JobConfig(
     @JsonProperty("schedule")
     val schedule: String, // 0 * * * * ?
     @JsonProperty("steps")
-    val steps: List<Step>
+    val steps: List<StepConfig>
 )

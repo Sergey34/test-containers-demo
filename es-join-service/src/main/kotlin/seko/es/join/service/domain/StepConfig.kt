@@ -3,9 +3,9 @@ package seko.es.join.service.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class Step(
+data class StepConfig(
     @JsonProperty("chunkSize")
-    val chunkSize: Int, // 100
+    val chunkSize: Int = 1000, // 100
     @JsonProperty("id")
     val id: String, // tasks
     @JsonProperty("processor")

@@ -1,12 +1,8 @@
 package seko.es.join.service.services
 
-import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.client.RestHighLevelClient
-import org.elasticsearch.index.query.QueryBuilders
-import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.quartz.*
 import org.springframework.batch.core.Job
-import org.springframework.batch.core.JobParameters
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.Step
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
@@ -18,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.JobConfig
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.jobs.JoinJob
@@ -52,7 +49,7 @@ class JoinService @Autowired constructor(
     private fun buildJobDetail(jobConfig: JobConfig): JobDetail {
         val jobDataMap = JobDataMap()
         jobDataMap["config"] = jobConfig
-        jobDataMap["jobParams"] = createJobParams(jobConfig)
+        jobDataMap["jobParamsBuilder"] = createJobParams(jobConfig)
         jobDataMap["job"] = getJob(jobConfig)
 
         return JobBuilder.newJob(JoinJob::class.java)
@@ -63,10 +60,9 @@ class JoinService @Autowired constructor(
             .build()
     }
 
-    private fun createJobParams(jobConfig: JobConfig): JobParameters {
+    private fun createJobParams(jobConfig: JobConfig): JobParametersBuilder {
         return JobParametersBuilder()
             .addString("JobID", jobConfig.jobId)
-            .toJobParameters()
     }
 
     private fun getJob(jobConfig: JobConfig): Job {
@@ -89,7 +85,7 @@ class JoinService @Autowired constructor(
         return stepsConfig.map {
             val reader = createReader(it)
             val processor = createProcessor(it)
-            val writer = createWriter(it)
+            val writer = createWriter(it, jobConfig.globalConfig)
             val chunkSize = it.chunkSize
 
             val sb = stepBuilderFactory[it.id]
@@ -104,24 +100,20 @@ class JoinService @Autowired constructor(
         }
     }
 
-    private fun createWriter(config: seko.es.join.service.domain.Step): EsItemWriter {
+    private fun createWriter(config: seko.es.join.service.domain.StepConfig, globalConfig: GlobalConfig): EsItemWriter {
         val writerConfig = config.writer
-        return EsItemWriter(restHighLevelClient)
+        return EsItemWriter(restHighLevelClient, writerConfig, globalConfig)
     }
 
-    private fun createProcessor(config: seko.es.join.service.domain.Step): ItemProcessor<Map<*, *>, Map<*, *>>? {
+    private fun createProcessor(config: seko.es.join.service.domain.StepConfig): ItemProcessor<Map<*, *>, Map<*, *>>? {
         val processorConfig = config.processor
         return null
     }
 
-    private fun createReader(config: seko.es.join.service.domain.Step): ElasticsearchItemReader {
+    private fun createReader(config: seko.es.join.service.domain.StepConfig): ElasticsearchItemReader {
         val readerConfig = config.reader
-        val searchRequest = SearchRequest("my_index")
-        val searchSourceBuilder = SearchSourceBuilder()
-        searchSourceBuilder.query(QueryBuilders.matchAllQuery())
-        searchRequest.source(searchSourceBuilder)
-        val elasticsearchItemReader = ElasticsearchItemReader(restHighLevelClient, searchRequest)
-        elasticsearchItemReader.setName("test")
+        val elasticsearchItemReader = ElasticsearchItemReader(restHighLevelClient, readerConfig, config.chunkSize)
+        elasticsearchItemReader.setName(config.id)
         return elasticsearchItemReader
     }
 }
