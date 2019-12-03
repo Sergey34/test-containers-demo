@@ -12,6 +12,8 @@ spring:
     properties:
       org.quartz.threadPool:
         threadCount: 2
+  profiles:
+    active: testcontainers
 
 
 management:

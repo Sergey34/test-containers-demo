@@ -11,6 +11,7 @@
     <modules>
         <module>es-test-framework</module>
         <module>es-test-examples</module>
+        <module>es-join-service</module>
     </modules>
 
     <dependencies>
