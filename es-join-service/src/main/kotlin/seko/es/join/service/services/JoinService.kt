@@ -72,7 +72,7 @@ class JoinService @Autowired constructor(
         val jobWithStep = jb.start(steps.first())
         if (steps.size > 1) {
             jobWithStep.apply {
-                steps.subList(1, steps.size - 1).forEach { step ->
+                steps.subList(1, steps.size).forEach { step ->
                     next(step)
                 }
             }

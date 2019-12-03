@@ -1,0 +1,13 @@
+{
+  "_index": "error-2018",
+  "_type": "doc",
+  "_id": "8",
+  "_source": {
+    "entity_type": "error",
+    "id": "8",
+    "user": "kimchy",
+    "date": "2009-11-15T14:12:12",
+    "likes": 0,
+    "message": "trying out Elasticsearch"
+  }
+}
