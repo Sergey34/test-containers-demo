@@ -29,7 +29,6 @@ class JoinService @Autowired constructor(
     val restHighLevelClient: RestHighLevelClient,
     var jobs: JobBuilderFactory
 ) {
-
     @EventListener(ContextRefreshedEvent::class)
     fun initScheduling() {
         esRepository.getJobs()

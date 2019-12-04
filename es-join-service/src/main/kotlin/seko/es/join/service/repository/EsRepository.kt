@@ -15,7 +15,7 @@ class EsRepository @Autowired constructor(
 ) {
 
     fun getJobs(): List<JobConfig> {
-        val jobs = objectMapper.readValue<List<JobConfig>>(File("es-join-service/t2.json").reader())
+        val jobs = objectMapper.readValue<List<JobConfig>>(File("t3.json").reader())
         return jobs
     }
 
