@@ -17,7 +17,9 @@ import org.springframework.stereotype.Service
 import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.JobConfig
 import seko.es.join.service.repository.EsRepository
-import seko.es.join.service.services.jobs.JoinJob
+import seko.es.join.service.services.batch.job.actions.EsItemReader
+import seko.es.join.service.services.batch.job.actions.EsItemWriter
+import seko.es.join.service.services.quartz.jobs.JoinJob
 
 @Service
 class JoinService @Autowired constructor(
@@ -89,7 +91,7 @@ class JoinService @Autowired constructor(
             val chunkSize = it.chunkSize
 
             val sb = stepBuilderFactory[it.id]
-                .chunk<Map<*, *>, Map<*, *>>(chunkSize)
+                .chunk<Map<String, Any>, Map<String, Any>>(chunkSize)
                 .reader(reader)
 
             processor?.let { p ->
@@ -105,14 +107,14 @@ class JoinService @Autowired constructor(
         return EsItemWriter(restHighLevelClient, writerConfig, globalConfig)
     }
 
-    private fun createProcessor(config: seko.es.join.service.domain.StepConfig): ItemProcessor<Map<*, *>, Map<*, *>>? {
+    private fun createProcessor(config: seko.es.join.service.domain.StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
         val processorConfig = config.processor
         return null
     }
 
-    private fun createReader(config: seko.es.join.service.domain.StepConfig): ElasticsearchItemReader {
+    private fun createReader(config: seko.es.join.service.domain.StepConfig): EsItemReader {
         val readerConfig = config.reader
-        val elasticsearchItemReader = ElasticsearchItemReader(restHighLevelClient, readerConfig, config.chunkSize)
+        val elasticsearchItemReader = EsItemReader(restHighLevelClient, readerConfig, config.chunkSize)
         elasticsearchItemReader.setName(config.id)
         return elasticsearchItemReader
     }

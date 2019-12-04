@@ -1,40 +1,45 @@
-[
-  {
-    "job_id": "1",
-    "job_name": "demo",
-    "job_description": "demo job",
-    "schedule": "0 * * * * ?",
-    "global_config": {
-      "target_index": "window"
-    },
-    "steps": [
-      {
-        "id": "errors",
-        "chunkSize": 5,
-        "reader": {
-          "type": "ES_SCROLL",
-          "index": "error-2018",
-          "query": "{\"match_all\": {}}"
-        },
-        "writer": {
-          "type": "UPDATE",
-          "id": "id"
+{
+  "job_id": "1",
+  "job_name": "demo",
+  "job_description": "demo job",
+  "schedule": "0 * * * * ?",
+  "global_config": {
+    "target_index": "window"
+  },
+  "steps": [
+    {
+      "id": "errors",
+      "chunkSize": 5,
+      "reader": {
+        "type": "ES_SCROLL",
+        "index": "error-2018",
+        "config": {
+          "query": "{\"match_all\": {}}",
+          "fields": [
+            "id",
+            "code",
+            "related_sales_order"
+          ],
+          "order": {
+            "field": "@timestamp",
+            "type": "ASC"
+          },
+          "script_fields": [
+            {
+              "field_name": "field_1",
+              "script": {
+                "lang": "painless",
+                "source": "doc['price'].value * 2 * params.factor",
+                "params": "{\"factor\": 2.0}"
+              }
+            }
+          ]
         }
       },
-      {
-        "id": "orders",
-        "chunkSize": 5,
-        "reader": {
-          "type": "ES_SCROLL",
-          "index": "order-2018",
-          "query": "{\"match_all\": {}}"
-        },
-        "writer": {
-          "type": "UPDATE",
-          "id": "error_id",
-          "target_field": "order"
-        }
+      "writer": {
+        "type": "UPDATE",
+        "id": "id"
       }
-    ]
-  }
-]
+    }
+  ]
+}

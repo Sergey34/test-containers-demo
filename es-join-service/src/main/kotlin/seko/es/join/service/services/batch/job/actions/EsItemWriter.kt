@@ -1,4 +1,4 @@
-package seko.es.join.service.services
+package seko.es.join.service.services.batch.job.actions
 
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.update.UpdateRequest
@@ -12,9 +12,9 @@ class EsItemWriter(
     private val client: RestHighLevelClient,
     private val writerConfig: Writer,
     private val globalConfig: GlobalConfig
-) : ItemWriter<Map<*, *>> {
+) : ItemWriter<Map<String, Any>> {
 
-    override fun write(items: MutableList<out Map<*, *>>) {
+    override fun write(items: MutableList<out Map<String, Any>>) {
         val bulkRequest = BulkRequest()
         items
             .map { doc ->

@@ -1,4 +1,4 @@
-package seko.es.join.service.services
+package seko.es.join.service.services.batch.job.actions
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -18,18 +18,17 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
 import seko.es.join.service.domain.Reader
 
-
-class ElasticsearchItemReader(
+class EsItemReader(
     private val restHighLevelClient: RestHighLevelClient,
     private val readerConfig: Reader,
     private val chunkSize: Int
-) : AbstractPaginatedDataItemReader<Map<*, *>>() {
+) : AbstractPaginatedDataItemReader<Map<String, Any>>() {
     private var scrollId: String? = null
     private lateinit var searchRequest: SearchRequest
     private val mapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
     override fun doOpen() {
-        searchRequest = SearchRequest(readerConfig.index)
+        /*searchRequest = SearchRequest(readerConfig.index)
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.size(chunkSize)
         searchSourceBuilder.query(QueryBuilders.wrapperQuery(readerConfig.query))
@@ -48,10 +47,10 @@ class ElasticsearchItemReader(
         searchRequest.source(searchSourceBuilder)
 
         val scroll = Scroll(TimeValue.timeValueMillis(readerConfig.time))
-        searchRequest.scroll(scroll)
+        searchRequest.scroll(scroll)*/
     }
 
-    override fun doPageRead(): Iterator<Map<*, *>> {
+    override fun doPageRead(): Iterator<Map<String, Any>> {
         val searchResponse: SearchResponse
         if (scrollId == null) {
             searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT)

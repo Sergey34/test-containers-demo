@@ -1,4 +1,4 @@
-package seko.es.join.service.services.jobs
+package seko.es.join.service.services.quartz.jobs
 
 import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
