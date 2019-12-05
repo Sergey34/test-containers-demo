@@ -18,12 +18,13 @@
             "time": "1000",
             "query": "{\"match_all\": {}}",
             "fields": [
+              "entity_type",
               "id",
-              "code",
-              "related_sales_order"
+              "likes",
+              "date"
             ],
             "order": {
-              "field": "@timestamp",
+              "field": "date",
               "type": "ASC"
             },
             "script_fields": [
@@ -31,7 +32,7 @@
                 "field_name": "field_1",
                 "script": {
                   "lang": "painless",
-                  "source": "doc['price'].value * 2 * params.factor",
+                  "source": "doc['likes'].value * 2 * params.factor",
                   "params": "{\"factor\": 2.0}"
                 }
               }
@@ -40,7 +41,12 @@
         },
         "writer": {
           "type": "UPDATE",
-          "id": "id"
+          "config": {
+            "doc_as_upsert": true,
+            "retry_on_conflict": 1,
+            "target_field": null,
+            "field_with_doc_id": "id"
+          }
         }
       }
     ]

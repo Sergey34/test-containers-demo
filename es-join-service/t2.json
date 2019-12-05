@@ -39,7 +39,12 @@
       },
       "writer": {
         "type": "UPDATE",
-        "id": "id"
+        "config": {
+          "doc_as_upsert": true,
+          "retry_on_conflict": 1,
+          "target_field": null,
+          "field_with_doc_id": "id"
+        }
       }
     }
   ]

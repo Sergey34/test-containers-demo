@@ -18,7 +18,7 @@ import seko.es.join.service.domain.Reader
 import seko.es.join.service.domain.ScriptField
 import java.lang.Long.parseLong
 
-class EsItemReader(
+class EsScrollItemReader(
         private val restHighLevelClient: RestHighLevelClient,
         private val readerConfig: Reader,
         private val chunkSize: Int
@@ -69,10 +69,13 @@ class EsItemReader(
 
     override fun doClose() {
         if (scrollId != null) {
-            val clearScrollRequest = ClearScrollRequest()
-            clearScrollRequest.addScrollId(scrollId)
-            restHighLevelClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
-            scrollId = null
+            try {
+                val clearScrollRequest = ClearScrollRequest()
+                clearScrollRequest.addScrollId(scrollId)
+                restHighLevelClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
+            } finally {
+                scrollId = null
+            }
         }
     }
 }

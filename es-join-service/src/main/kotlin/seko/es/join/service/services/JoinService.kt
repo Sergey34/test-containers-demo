@@ -16,9 +16,11 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.Reader
+import seko.es.join.service.domain.StepConfig
 import seko.es.join.service.repository.EsRepository
-import seko.es.join.service.services.batch.job.actions.EsItemReader
-import seko.es.join.service.services.batch.job.actions.EsItemWriter
+import seko.es.join.service.services.batch.job.actions.EsScrollItemReader
+import seko.es.join.service.services.batch.job.actions.EsItemUpdateWriter
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
 @Service
@@ -101,20 +103,24 @@ class JoinService @Autowired constructor(
         }
     }
 
-    private fun createWriter(config: seko.es.join.service.domain.StepConfig, globalConfig: GlobalConfig): EsItemWriter {
+    private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): EsItemUpdateWriter {
         val writerConfig = config.writer
-        return EsItemWriter(restHighLevelClient, writerConfig, globalConfig)
+        return EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
     }
 
-    private fun createProcessor(config: seko.es.join.service.domain.StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
+    private fun createProcessor(config: StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
         val processorConfig = config.processor
         return null
     }
 
-    private fun createReader(config: seko.es.join.service.domain.StepConfig): EsItemReader {
+    private fun createReader(config: StepConfig): EsScrollItemReader {
         val readerConfig = config.reader
-        val elasticsearchItemReader = EsItemReader(restHighLevelClient, readerConfig, config.chunkSize)
-        elasticsearchItemReader.setName(config.id)
-        return elasticsearchItemReader
+        when (readerConfig.type) {
+            Reader.ReaderType.ES_SCROLL-> {
+                val elasticsearchItemReader = EsScrollItemReader(restHighLevelClient, readerConfig, config.chunkSize)
+                elasticsearchItemReader.setName(config.id)
+                return elasticsearchItemReader
+            }
+        }
     }
 }
