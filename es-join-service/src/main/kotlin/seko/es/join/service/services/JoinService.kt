@@ -16,8 +16,8 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.*
 import seko.es.join.service.repository.EsRepository
-import seko.es.join.service.services.batch.job.actions.EsItemUpdateWriter
-import seko.es.join.service.services.batch.job.actions.EsScrollItemReader
+import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
+import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
 @Service

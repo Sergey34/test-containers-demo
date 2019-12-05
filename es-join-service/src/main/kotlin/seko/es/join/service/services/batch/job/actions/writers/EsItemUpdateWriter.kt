@@ -1,4 +1,4 @@
-package seko.es.join.service.services.batch.job.actions
+package seko.es.join.service.services.batch.job.actions.writers
 
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.update.UpdateRequest

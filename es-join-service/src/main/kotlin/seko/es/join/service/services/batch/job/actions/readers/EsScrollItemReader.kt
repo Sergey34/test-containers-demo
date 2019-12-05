@@ -1,4 +1,4 @@
-package seko.es.join.service.services.batch.job.actions
+package seko.es.join.service.services.batch.job.actions.readers
 
 import org.elasticsearch.action.search.ClearScrollRequest
 import org.elasticsearch.action.search.SearchRequest
