@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.Processor
 import seko.es.join.service.domain.Reader
 import seko.es.join.service.domain.Writer
 import java.io.File
@@ -78,9 +79,14 @@ class JobConfigParser @Autowired constructor(private val objectMapper: ObjectMap
                     && VALIDATE_SCRIPT(config["script_fields"])
         }
         @JvmField
+        val JS_PROCESSOR_CONFIG_VALIDATOR = { config: Map<String, *> ->
+            config["script"] is String && config["field_with_doc_id"].toString().isNotBlank()
+        }
+        @JvmField
         val VALIDATORS: Map<Enum<*>, (Map<String, *>) -> Boolean> = mapOf(
                 Reader.ReaderType.ES_SCROLL to ES_SCROLL_CONFIG_VALIDATOR,
-                Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR
+                Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
+                Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR
         )
     }
 }

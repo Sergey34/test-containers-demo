@@ -15,7 +15,10 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.*
+import seko.es.join.service.domain.Processor.ProcessorType.GROOVY
+import seko.es.join.service.domain.Processor.ProcessorType.JS
 import seko.es.join.service.repository.EsRepository
+import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.quartz.jobs.JoinJob
@@ -106,15 +109,22 @@ class JoinService @Autowired constructor(
             Writer.WriterType.UPDATE -> {
                 return EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
             }
-            Writer.WriterType.INSERT -> throw IllegalStateException()
-            Writer.WriterType.UPDATE_BY_QUERY -> throw IllegalStateException()
-            Writer.WriterType.UPDATE_BY_SCRIPT -> throw IllegalStateException()
+            Writer.WriterType.INSERT -> TODO()
+            Writer.WriterType.UPDATE_BY_QUERY -> TODO()
+            Writer.WriterType.UPDATE_BY_SCRIPT -> TODO()
         }
     }
 
     private fun createProcessor(config: StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
         val processorConfig = config.processor
-        return null
+        return processorConfig?.let {
+            when (processorConfig.type) {
+                JS -> {
+                    return EsItemJsProcessor(processorConfig)
+                }
+                GROOVY -> TODO()
+            }
+        }
     }
 
     private fun createReader(config: StepConfig): EsScrollItemReader {

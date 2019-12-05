@@ -23,7 +23,7 @@ data class Script(
         }
 
         private fun parseParams(config: Map<String, String>): Map<String, Any> {
-            return objectMapper.readValue<Map<String, Any>>(config["params"] as String)
+            return objectMapper.readValue(config["params"] as String)
         }
     }
 }

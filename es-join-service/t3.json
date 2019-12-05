@@ -39,6 +39,12 @@
             ]
           }
         },
+        "processor": {
+          "type": "JS",
+          "config": {
+            "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+          }
+        },
         "writer": {
           "type": "UPDATE",
           "config": {
