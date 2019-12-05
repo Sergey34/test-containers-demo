@@ -18,12 +18,12 @@ data class Script(
         @JvmField
         val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
-        fun from(config: Map<String, String>): Script {
-            return Script(config["lang"] as String, parseParams(config), config["source"] as String)
+        fun from(config: Map<String, String>?): Script? {
+            return config?.let{ Script(it["lang"] as String, parseParams(it), it["source"] as String) }
         }
 
         private fun parseParams(config: Map<String, String>): Map<String, Any> {
-            return objectMapper.readValue<Map<String, Any>>( config ["params"] as String)
+            return objectMapper.readValue<Map<String, Any>>(config["params"] as String)
         }
     }
 }

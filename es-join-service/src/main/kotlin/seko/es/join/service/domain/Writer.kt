@@ -36,7 +36,7 @@ data class Writer(
     ) {
         companion object {
             fun from(config: Map<String, Any>): EsUpdateWriter {
-                return EsUpdateWriter(Script.from(config["script"] as Map<String, String>),
+                return EsUpdateWriter(Script.from(config["script"] as Map<String, String>?),
                         config["doc_as_upsert"] as Boolean,
                         config["retry_on_conflict"] as Int,
                         config["target_field"] as String?,

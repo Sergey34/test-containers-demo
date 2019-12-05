@@ -14,39 +14,36 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
-import seko.es.join.service.domain.GlobalConfig
-import seko.es.join.service.domain.JobConfig
-import seko.es.join.service.domain.Reader
-import seko.es.join.service.domain.StepConfig
+import seko.es.join.service.domain.*
 import seko.es.join.service.repository.EsRepository
-import seko.es.join.service.services.batch.job.actions.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.EsItemUpdateWriter
+import seko.es.join.service.services.batch.job.actions.EsScrollItemReader
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
 @Service
 class JoinService @Autowired constructor(
-    val esRepository: EsRepository,
-    val scheduler: Scheduler,
-    val stepBuilderFactory: StepBuilderFactory,
-    val restHighLevelClient: RestHighLevelClient,
-    var jobs: JobBuilderFactory
+        val esRepository: EsRepository,
+        val scheduler: Scheduler,
+        val stepBuilderFactory: StepBuilderFactory,
+        val restHighLevelClient: RestHighLevelClient,
+        var jobs: JobBuilderFactory
 ) {
     @EventListener(ContextRefreshedEvent::class)
     fun initScheduling() {
         esRepository.getJobs()
-            .forEach {
-                scheduler.scheduleJob(buildJobDetail(it), buildTrigger(it))
-            }
+                .forEach {
+                    scheduler.scheduleJob(buildJobDetail(it), buildTrigger(it))
+                }
     }
 
     private fun buildTrigger(jobConfig: JobConfig): CronTrigger {
         return TriggerBuilder
-            .newTrigger()
-            .withIdentity(jobConfig.jobId, "namespace")
-            .withSchedule(
-                CronScheduleBuilder.cronSchedule(jobConfig.schedule)
-            )
-            .build()
+                .newTrigger()
+                .withIdentity(jobConfig.jobId, "namespace")
+                .withSchedule(
+                        CronScheduleBuilder.cronSchedule(jobConfig.schedule)
+                )
+                .build()
     }
 
     private fun buildJobDetail(jobConfig: JobConfig): JobDetail {
@@ -56,21 +53,21 @@ class JoinService @Autowired constructor(
         jobDataMap["job"] = getJob(jobConfig)
 
         return JobBuilder.newJob(JoinJob::class.java)
-            .withIdentity(jobConfig.jobId, "namespace")
-            .withDescription(jobConfig.jobDescription)
-            .usingJobData(jobDataMap)
-            .storeDurably()
-            .build()
+                .withIdentity(jobConfig.jobId, "namespace")
+                .withDescription(jobConfig.jobDescription)
+                .usingJobData(jobDataMap)
+                .storeDurably()
+                .build()
     }
 
     private fun createJobParams(jobConfig: JobConfig): JobParametersBuilder {
         return JobParametersBuilder()
-            .addString("JobID", jobConfig.jobId)
+                .addString("JobID", jobConfig.jobId)
     }
 
     private fun getJob(jobConfig: JobConfig): Job {
         val jb = jobs[jobConfig.jobId]
-            .incrementer(RunIdIncrementer())
+                .incrementer(RunIdIncrementer())
         val steps: List<Step> = createSteps(jobConfig)
         val jobWithStep = jb.start(steps.first())
         if (steps.size > 1) {
@@ -92,8 +89,8 @@ class JoinService @Autowired constructor(
             val chunkSize = it.chunkSize
 
             val sb = stepBuilderFactory[it.id]
-                .chunk<Map<String, Any>, Map<String, Any>>(chunkSize)
-                .reader(reader)
+                    .chunk<Map<String, Any>, Map<String, Any>>(chunkSize)
+                    .reader(reader)
 
             processor?.let { p ->
                 sb.processor(p)
@@ -105,7 +102,14 @@ class JoinService @Autowired constructor(
 
     private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): EsItemUpdateWriter {
         val writerConfig = config.writer
-        return EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
+        when (writerConfig.type) {
+            Writer.WriterType.UPDATE -> {
+                return EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
+            }
+            Writer.WriterType.INSERT -> throw IllegalStateException()
+            Writer.WriterType.UPDATE_BY_QUERY -> throw IllegalStateException()
+            Writer.WriterType.UPDATE_BY_SCRIPT -> throw IllegalStateException()
+        }
     }
 
     private fun createProcessor(config: StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
@@ -116,7 +120,7 @@ class JoinService @Autowired constructor(
     private fun createReader(config: StepConfig): EsScrollItemReader {
         val readerConfig = config.reader
         when (readerConfig.type) {
-            Reader.ReaderType.ES_SCROLL-> {
+            Reader.ReaderType.ES_SCROLL -> {
                 val elasticsearchItemReader = EsScrollItemReader(restHighLevelClient, readerConfig, config.chunkSize)
                 elasticsearchItemReader.setName(config.id)
                 return elasticsearchItemReader

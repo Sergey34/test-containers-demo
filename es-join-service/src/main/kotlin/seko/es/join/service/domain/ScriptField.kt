@@ -11,7 +11,8 @@ data class ScriptField(
 ) {
     companion object {
         fun from(config: Map<String, Any>): ScriptField {
-            return ScriptField(config["field_name"] as String, Script.from(config["script"] as Map<String, String>))
+            val script = Script.from(config["script"] as Map<String, String>) ?: throw IllegalStateException()
+            return ScriptField(config["field_name"] as String, script)
         }
     }
 }
