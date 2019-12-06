@@ -19,6 +19,7 @@ import seko.es.join.service.domain.Processor.ProcessorType.JOIN
 import seko.es.join.service.domain.Processor.ProcessorType.JS
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.CompositeProcessor
+import seko.es.join.service.services.batch.job.actions.processors.EsItemJoinProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
@@ -96,11 +97,10 @@ class JoinService @Autowired constructor(
                 .chunk<MutableMap<String, Any>, Map<String, Any>>(chunkSize)
                 .reader(reader)
 
-            processor?.let { p ->
-                sb.processor(p)
-            }
-
-            sb.writer(writer).build()
+            sb.apply {
+                processor?.let { p -> processor(p) }
+                writer(writer)
+            }.build()
         }
     }
 
@@ -119,10 +119,8 @@ class JoinService @Autowired constructor(
     private fun createProcessor(config: StepConfig): ItemProcessor<MutableMap<String, Any>, Map<String, Any>>? {
         return config.processors?.map {
             when (it.type) {
-                JS -> {
-                    EsItemJsProcessor(it)
-                }
-                JOIN -> TODO()
+                JS -> EsItemJsProcessor(it)
+                JOIN -> EsItemJoinProcessor(it, restHighLevelClient)
             }
         }?.let {
             CompositeProcessor(it)

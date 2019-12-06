@@ -9,7 +9,7 @@ data class Reader(
     val index: String, // task*
     @JsonProperty("type")
     val type: ReaderType, // es
-    val config: Map<String, *>
+    val config: Map<String, Any>
 ) {
     enum class ReaderType {
         ES_SCROLL
@@ -18,11 +18,20 @@ data class Reader(
     class Order(
         val field: String,
         val type: SortOrder
-    )
+    ) {
+        companion object {
+            fun from(config: Map<String, Any>): Order {
+                return Order(
+                    config["field"] as String,
+                    SortOrder.valueOf(config["order"] as String)
+                )
+            }
+        }
+    }
 
     class EsScrollReader(
         @JsonProperty("fields")
-        val fields: List<String>?,
+        val fields: List<String> = listOf(),
         @JsonProperty("order")
         val order: Order?,
         @JsonProperty("query")
@@ -31,5 +40,19 @@ data class Reader(
         val scriptFields: List<ScriptField> = listOf(),
         @JsonProperty("time")
         val time: Long = 60_000L
-    )
+    ) {
+        companion object {
+            fun from(config: Map<String, Any>): EsScrollReader {
+                val scriptFields = (config["script_fields"] as List<Map<String, Any>>?)
+                    ?.map { ScriptField.from(it) } ?: listOf()
+                return EsScrollReader(
+                    config["fields"] as List<String>? ?: listOf(),
+                    Order.from(config["order"] as Map<String, Any>),
+                    config["query"] as String,
+                    scriptFields,
+                    config["time"] as Long
+                )
+            }
+        }
+    }
 }

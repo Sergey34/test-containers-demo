@@ -12,47 +12,45 @@ import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
-import org.elasticsearch.search.sort.SortOrder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
 import seko.es.join.service.domain.Reader
-import seko.es.join.service.domain.ScriptField
-import java.lang.Long.parseLong
 
 class EsScrollItemReader(
     private val restHighLevelClient: RestHighLevelClient,
-    private val readerConfig: Reader,
+    readerConfig: Reader,
     private val chunkSize: Int
 ) : AbstractPaginatedDataItemReader<MutableMap<String, Any>>() {
+    private val config = Reader.EsScrollReader.from(readerConfig.config)
+    private val index = readerConfig.index
+
     private var scrollId: String? = null
     private lateinit var searchRequest: SearchRequest
 
     override fun doOpen() {
-        searchRequest = SearchRequest(readerConfig.index)
+        searchRequest = SearchRequest(index)
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.size(chunkSize)
-        searchSourceBuilder.query(QueryBuilders.wrapperQuery(readerConfig.config["query"] as String))
+        searchSourceBuilder.query(QueryBuilders.wrapperQuery(config.query))
 
-        (readerConfig.config["fields"] as List<String>?)?.let {
+        config.fields.let {
             searchSourceBuilder.fetchSource(it.toTypedArray(), null)
         }
-        (readerConfig.config["order"] as Map<String, String>?)?.let {
-            searchSourceBuilder.sort(it["field"], SortOrder.fromString(it["type"]))
+        config.order?.let {
+            searchSourceBuilder.sort(it.field, it.type)
         }
-        (readerConfig.config["script_fields"] as List<Map<String, Any>>?)
-            ?.map { ScriptField.from(it) }
-            ?.forEach {
-                val script = it.script.params
-                    ?.let { p -> Script(ScriptType.INLINE, it.script.lang, it.script.source, p) }
-                    ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf())
-                searchSourceBuilder.scriptField(it.fieldName, script)
-            }
+        config.scriptFields.forEach {
+            val script = it.script.params
+                ?.let { p -> Script(ScriptType.INLINE, it.script.lang, it.script.source, p) }
+                ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf())
+            searchSourceBuilder.scriptField(it.fieldName, script)
+        }
         searchRequest.source(searchSourceBuilder)
 
-        val scroll = Scroll(TimeValue.timeValueMillis(parseLong(readerConfig.config["time"] as String)))
+        val scroll = Scroll(TimeValue.timeValueMillis(config.time))
         searchRequest.scroll(scroll)
     }
 
-    override fun doPageRead(): Iterator<Map<String, Any>> {
+    override fun doPageRead(): Iterator<MutableMap<String, Any>> {
         val searchResponse: SearchResponse
         if (scrollId == null) {
             searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT)

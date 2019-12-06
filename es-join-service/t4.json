@@ -39,19 +39,23 @@
             ]
           }
         },
-        "processor": {
-          "type": "JOIN",
-          "config": {
-            "joins": [
-              {
-                "type": "SEARCH_JOIN",
-                "index": "order-*",
-                "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
-                "target_field": "order"
-              }
-            ]
+        "processor": [
+          {
+            "type": "JOIN",
+            "config": {
+              "type": "SEARCH_JOIN",
+              "index": "order-*",
+              "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
+              "target_field": "order"
+            }
+          },
+          {
+            "type": "JS",
+            "config": {
+              "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+            }
           }
-        },
+        ],
         "writer": {
           "type": "UPDATE",
           "config": {

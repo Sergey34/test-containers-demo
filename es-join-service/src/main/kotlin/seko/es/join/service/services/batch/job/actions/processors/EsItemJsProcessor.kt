@@ -17,7 +17,7 @@ class EsItemJsProcessor(processor: Processor) : ItemProcessor<MutableMap<String,
         this.inv = scriptEngine as Invocable
     }
 
-    override fun process(item: Map<String, Any>): Map<String, Any> {
+    override fun process(item: MutableMap<String, Any>): Map<String, Any> {
         return inv.invokeFunction("process", item) as Map<String, Any>
     }
 }
