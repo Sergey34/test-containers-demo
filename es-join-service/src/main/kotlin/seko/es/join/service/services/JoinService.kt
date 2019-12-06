@@ -15,7 +15,7 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.*
-import seko.es.join.service.domain.Processor.ProcessorType.GROOVY
+import seko.es.join.service.domain.Processor.ProcessorType.JOIN
 import seko.es.join.service.domain.Processor.ProcessorType.JS
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
@@ -122,7 +122,7 @@ class JoinService @Autowired constructor(
                 JS -> {
                     return EsItemJsProcessor(processorConfig)
                 }
-                GROOVY -> TODO()
+                JOIN -> TODO()
             }
         }
     }

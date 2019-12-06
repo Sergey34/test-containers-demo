@@ -20,7 +20,34 @@ data class Processor(
         }
     }
 
+    data class JoinProcessor(
+            @JsonProperty("type")
+            val type: String,
+            @JsonProperty("index")
+            val index: String,
+            @JsonProperty("query")
+            val query: String,
+            @JsonProperty("target_field")
+            val target_field: String,
+            val size: Int = 10,
+            val params: List<String>
+    ) {
+
+
+        companion object {
+            fun from(config: Map<String, *>): JoinProcessor {
+                return JoinProcessor(config["type"] as String,
+                        config["index"] as String,
+                        config["query"] as String,
+                        config["target_field"] as String,
+                        config["size"] as Int,
+                        config["params"] as List<String>
+                )
+            }
+        }
+    }
+
     enum class ProcessorType {
-        GROOVY, JS
+        JOIN, JS
     }
 }
