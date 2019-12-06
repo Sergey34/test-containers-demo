@@ -11,9 +11,9 @@ import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.Writer
 
 class EsItemUpdateWriter(
-        private val client: RestHighLevelClient,
-        writerConfig: Writer,
-        private val globalConfig: GlobalConfig
+    private val client: RestHighLevelClient,
+    writerConfig: Writer,
+    private val globalConfig: GlobalConfig
 ) : ItemWriter<Map<String, Any>> {
     companion object {
         const val TYPE: String = "doc"
@@ -24,22 +24,22 @@ class EsItemUpdateWriter(
     override fun write(items: MutableList<out Map<String, Any>>) {
         val bulkRequest = BulkRequest()
         items
-                .map { doc ->
-                    val script = updateWriterConfig.script?.let {
-                        Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, it.source, it.params)
-                    }
-                    val esDoc = (updateWriterConfig.targetField?.let { mapOf(updateWriterConfig.targetField to doc) }
-                            ?: doc)
-                    UpdateRequest()
-                            .docAsUpsert(updateWriterConfig.docAsUpsert)
-                            .script(script)
-                            .retryOnConflict(updateWriterConfig.retryOnConflict)
-                            .index(globalConfig.targetIndex)
-                            .doc(esDoc)
-                            .type(TYPE)
-                            .id(doc[updateWriterConfig.fieldWithDocId] as String?)
+            .map { doc ->
+                val script = updateWriterConfig.script?.let {
+                    Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, it.source, it.params)
                 }
-                .forEach { bulkRequest.add(it) }
+                val esDoc = (updateWriterConfig.targetField?.let { mapOf(updateWriterConfig.targetField to doc) }
+                    ?: doc)
+                UpdateRequest()
+                    .docAsUpsert(updateWriterConfig.docAsUpsert)
+                    .script(script)
+                    .retryOnConflict(updateWriterConfig.retryOnConflict)
+                    .index(globalConfig.targetIndex)
+                    .doc(esDoc)
+                    .type(TYPE)
+                    .id(doc[updateWriterConfig.fieldWithDocId] as String?)
+            }
+            .forEach { bulkRequest.add(it) }
 
         val bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT)
         println(bulk)

@@ -7,19 +7,19 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 
 data class Script(
-        @JsonProperty("lang")
-        val lang: String = "painless",
-        @JsonProperty("params")
-        val params: Map<String, Any>?,
-        @JsonProperty("source")
-        val source: String // doc['price'].value * 2 * params.factor
+    @JsonProperty("lang")
+    val lang: String = "painless",
+    @JsonProperty("params")
+    val params: Map<String, Any>?,
+    @JsonProperty("source")
+    val source: String // doc['price'].value * 2 * params.factor
 ) {
     companion object {
         @JvmField
         val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
         fun from(config: Map<String, String>?): Script? {
-            return config?.let{ Script(it["lang"] as String, parseParams(it), it["source"] as String) }
+            return config?.let { Script(it["lang"] as String, parseParams(it), it["source"] as String) }
         }
 
         private fun parseParams(config: Map<String, String>): Map<String, Any> {

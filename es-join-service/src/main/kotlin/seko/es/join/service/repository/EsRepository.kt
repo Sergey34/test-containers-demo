@@ -10,8 +10,8 @@ import java.io.File
 
 @Repository
 class EsRepository @Autowired constructor(
-        private val restHighLevelClient: RestHighLevelClient,
-        private val objectMapper: ObjectMapper
+    private val restHighLevelClient: RestHighLevelClient,
+    private val objectMapper: ObjectMapper
 ) {
 
     fun getJobs(): List<JobConfig> {

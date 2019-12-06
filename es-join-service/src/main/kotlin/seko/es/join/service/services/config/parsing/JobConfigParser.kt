@@ -17,7 +17,7 @@ class JobConfigParser @Autowired constructor(private val objectMapper: ObjectMap
         val isValidConfig = jobConfig.steps.all {
             validate(it.reader.type, it.reader.config)
                     && validate(it.writer.type, it.writer.config)
-                    && it.processor?.let { p -> validate(p.type, p.config) } ?: true
+                    && it.processors?.let { p -> validate(p.type, p.config) } ?: true
         }
         return if (isValidConfig) {
             jobConfig
@@ -66,7 +66,9 @@ class JobConfigParser @Autowired constructor(private val objectMapper: ObjectMap
             config["query"] is String
                     && config["query"].toString().isNotBlank()
                     && (config["fields"] == null || (config["fields"] as List<String>).size > 0)
-                    && (config["order"] == null || (config["order"] is Map<*, *> && (config["order"] as Map<*, *>).keys.containsAll(listOf("field", "type"))))
+                    && (config["order"] == null || (config["order"] is Map<*, *> && (config["order"] as Map<*, *>).keys.containsAll(
+                listOf("field", "type")
+            )))
                     && VALIDATE_SCRIPT(config["script_fields"])
         }
         @JvmField
@@ -84,9 +86,9 @@ class JobConfigParser @Autowired constructor(private val objectMapper: ObjectMap
         }
         @JvmField
         val VALIDATORS: Map<Enum<*>, (Map<String, *>) -> Boolean> = mapOf(
-                Reader.ReaderType.ES_SCROLL to ES_SCROLL_CONFIG_VALIDATOR,
-                Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
-                Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR
+            Reader.ReaderType.ES_SCROLL to ES_SCROLL_CONFIG_VALIDATOR,
+            Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
+            Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR
         )
     }
 }

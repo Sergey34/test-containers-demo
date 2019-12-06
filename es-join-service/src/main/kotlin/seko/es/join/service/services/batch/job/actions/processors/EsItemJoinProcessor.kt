@@ -10,8 +10,8 @@ import seko.es.join.service.domain.Processor
 
 
 class EsItemJoinProcessor(
-        processor: Processor,
-        private val restHighLevelClient: RestHighLevelClient
+    processor: Processor,
+    private val restHighLevelClient: RestHighLevelClient
 ) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
     private val joinProcessorConfig: Processor.JoinProcessor = Processor.JoinProcessor.from(processor.config)
 
@@ -22,7 +22,8 @@ class EsItemJoinProcessor(
         request.script = joinProcessorConfig.query
         request.scriptParams = item.filterKeys { it in joinProcessorConfig.params }
 
-        item[joinProcessorConfig.target_field] = restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT).response.hits.hits
+        item[joinProcessorConfig.target_field] =
+            restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT).response.hits.hits
         return item
     }
 }

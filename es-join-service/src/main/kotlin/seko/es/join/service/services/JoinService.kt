@@ -18,6 +18,7 @@ import seko.es.join.service.domain.*
 import seko.es.join.service.domain.Processor.ProcessorType.JOIN
 import seko.es.join.service.domain.Processor.ProcessorType.JS
 import seko.es.join.service.repository.EsRepository
+import seko.es.join.service.services.batch.job.actions.processors.CompositeProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
@@ -25,28 +26,28 @@ import seko.es.join.service.services.quartz.jobs.JoinJob
 
 @Service
 class JoinService @Autowired constructor(
-        val esRepository: EsRepository,
-        val scheduler: Scheduler,
-        val stepBuilderFactory: StepBuilderFactory,
-        val restHighLevelClient: RestHighLevelClient,
-        var jobs: JobBuilderFactory
+    val esRepository: EsRepository,
+    val scheduler: Scheduler,
+    val stepBuilderFactory: StepBuilderFactory,
+    val restHighLevelClient: RestHighLevelClient,
+    var jobs: JobBuilderFactory
 ) {
     @EventListener(ContextRefreshedEvent::class)
     fun initScheduling() {
         esRepository.getJobs()
-                .forEach {
-                    scheduler.scheduleJob(buildJobDetail(it), buildTrigger(it))
-                }
+            .forEach {
+                scheduler.scheduleJob(buildJobDetail(it), buildTrigger(it))
+            }
     }
 
     private fun buildTrigger(jobConfig: JobConfig): CronTrigger {
         return TriggerBuilder
-                .newTrigger()
-                .withIdentity(jobConfig.jobId, "namespace")
-                .withSchedule(
-                        CronScheduleBuilder.cronSchedule(jobConfig.schedule)
-                )
-                .build()
+            .newTrigger()
+            .withIdentity(jobConfig.jobId, "namespace")
+            .withSchedule(
+                CronScheduleBuilder.cronSchedule(jobConfig.schedule)
+            )
+            .build()
     }
 
     private fun buildJobDetail(jobConfig: JobConfig): JobDetail {
@@ -56,21 +57,21 @@ class JoinService @Autowired constructor(
         jobDataMap["job"] = getJob(jobConfig)
 
         return JobBuilder.newJob(JoinJob::class.java)
-                .withIdentity(jobConfig.jobId, "namespace")
-                .withDescription(jobConfig.jobDescription)
-                .usingJobData(jobDataMap)
-                .storeDurably()
-                .build()
+            .withIdentity(jobConfig.jobId, "namespace")
+            .withDescription(jobConfig.jobDescription)
+            .usingJobData(jobDataMap)
+            .storeDurably()
+            .build()
     }
 
     private fun createJobParams(jobConfig: JobConfig): JobParametersBuilder {
         return JobParametersBuilder()
-                .addString("JobID", jobConfig.jobId)
+            .addString("JobID", jobConfig.jobId)
     }
 
     private fun getJob(jobConfig: JobConfig): Job {
         val jb = jobs[jobConfig.jobId]
-                .incrementer(RunIdIncrementer())
+            .incrementer(RunIdIncrementer())
         val steps: List<Step> = createSteps(jobConfig)
         val jobWithStep = jb.start(steps.first())
         if (steps.size > 1) {
@@ -92,8 +93,8 @@ class JoinService @Autowired constructor(
             val chunkSize = it.chunkSize
 
             val sb = stepBuilderFactory[it.id]
-                    .chunk<Map<String, Any>, Map<String, Any>>(chunkSize)
-                    .reader(reader)
+                .chunk<MutableMap<String, Any>, Map<String, Any>>(chunkSize)
+                .reader(reader)
 
             processor?.let { p ->
                 sb.processor(p)
@@ -115,15 +116,16 @@ class JoinService @Autowired constructor(
         }
     }
 
-    private fun createProcessor(config: StepConfig): ItemProcessor<Map<String, Any>, Map<String, Any>>? {
-        val processorConfig = config.processor
-        return processorConfig?.let {
-            when (processorConfig.type) {
+    private fun createProcessor(config: StepConfig): ItemProcessor<MutableMap<String, Any>, Map<String, Any>>? {
+        return config.processors?.map {
+            when (it.type) {
                 JS -> {
-                    return EsItemJsProcessor(processorConfig)
+                    EsItemJsProcessor(it)
                 }
                 JOIN -> TODO()
             }
+        }?.let {
+            CompositeProcessor(it)
         }
     }
 

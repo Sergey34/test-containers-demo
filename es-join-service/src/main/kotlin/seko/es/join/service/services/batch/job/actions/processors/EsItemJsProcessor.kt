@@ -6,12 +6,13 @@ import seko.es.join.service.domain.Processor
 import javax.script.Invocable
 
 
-class EsItemJsProcessor(processor: Processor) : ItemProcessor<Map<String, Any>, Map<String, Any>> {
+class EsItemJsProcessor(processor: Processor) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
     private val scriptProcessorConfig: Processor.ScriptProcessor = Processor.ScriptProcessor.from(processor.config)
     private val inv: Invocable
 
     init {
-        val scriptEngine = NashornScriptEngineFactory().getScriptEngine("-strict", "--no-java", "--no-syntax-extensions")
+        val scriptEngine =
+            NashornScriptEngineFactory().getScriptEngine("-strict", "--no-java", "--no-syntax-extensions")
         scriptEngine.eval(scriptProcessorConfig.script)
         this.inv = scriptEngine as Invocable
     }

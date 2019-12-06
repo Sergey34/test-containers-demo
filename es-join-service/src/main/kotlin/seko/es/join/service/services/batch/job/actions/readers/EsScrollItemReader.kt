@@ -19,10 +19,10 @@ import seko.es.join.service.domain.ScriptField
 import java.lang.Long.parseLong
 
 class EsScrollItemReader(
-        private val restHighLevelClient: RestHighLevelClient,
-        private val readerConfig: Reader,
-        private val chunkSize: Int
-) : AbstractPaginatedDataItemReader<Map<String, Any>>() {
+    private val restHighLevelClient: RestHighLevelClient,
+    private val readerConfig: Reader,
+    private val chunkSize: Int
+) : AbstractPaginatedDataItemReader<MutableMap<String, Any>>() {
     private var scrollId: String? = null
     private lateinit var searchRequest: SearchRequest
 
@@ -39,13 +39,13 @@ class EsScrollItemReader(
             searchSourceBuilder.sort(it["field"], SortOrder.fromString(it["type"]))
         }
         (readerConfig.config["script_fields"] as List<Map<String, Any>>?)
-                ?.map { ScriptField.from(it) }
-                ?.forEach {
-                    val script = it.script.params
-                            ?.let { p -> Script(ScriptType.INLINE, it.script.lang, it.script.source, p) }
-                            ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf())
-                    searchSourceBuilder.scriptField(it.fieldName, script)
-                }
+            ?.map { ScriptField.from(it) }
+            ?.forEach {
+                val script = it.script.params
+                    ?.let { p -> Script(ScriptType.INLINE, it.script.lang, it.script.source, p) }
+                    ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf())
+                searchSourceBuilder.scriptField(it.fieldName, script)
+            }
         searchRequest.source(searchSourceBuilder)
 
         val scroll = Scroll(TimeValue.timeValueMillis(parseLong(readerConfig.config["time"] as String)))
