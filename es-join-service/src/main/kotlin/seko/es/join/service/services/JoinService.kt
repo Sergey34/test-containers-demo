@@ -45,9 +45,7 @@ class JoinService @Autowired constructor(
         return TriggerBuilder
             .newTrigger()
             .withIdentity(jobConfig.jobId, "namespace")
-            .withSchedule(
-                CronScheduleBuilder.cronSchedule(jobConfig.schedule)
-            )
+            .withSchedule(CronScheduleBuilder.cronSchedule(jobConfig.schedule))
             .build()
     }
 

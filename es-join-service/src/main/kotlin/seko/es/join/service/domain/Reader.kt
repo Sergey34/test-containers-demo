@@ -3,6 +3,7 @@ package seko.es.join.service.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.elasticsearch.search.sort.SortOrder
+import java.lang.Long.parseLong
 
 data class Reader(
     @JsonProperty("index")
@@ -50,7 +51,7 @@ data class Reader(
                     Order.from(config["order"] as Map<String, Any>),
                     config["query"] as String,
                     scriptFields,
-                    config["time"] as Long
+                    parseLong(config["time"] as String)
                 )
             }
         }
