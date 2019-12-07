@@ -1,6 +1,7 @@
 package seko.es.join.service.services
 
 import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.search.slice.SliceBuilder
 import org.quartz.*
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
@@ -26,6 +27,7 @@ import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReade
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.quartz.jobs.JoinJob
+
 
 @Service
 class JoinService @Autowired constructor(
@@ -134,5 +136,27 @@ class JoinService @Autowired constructor(
                 return elasticsearchItemReader
             }
         }
+    }
+
+    fun getJobConfigs(): List<JobConfig> {
+        return esRepository.getConfig(getSliceConfig())
+    }
+
+    private fun getSliceConfig(): SliceBuilder {
+        return SliceBuilder(0, 1)
+    }
+
+    fun getCurrentlyExecutingJobs(): List<Map<String, Any?>> {
+        return scheduler.currentlyExecutingJobs.map {
+            mapOf(
+                "jobParams" to it.mergedJobDataMap["jobParams"],
+                "jobParamsBuilder" to it.mergedJobDataMap["jobParamsBuilder"],
+                "config" to it.mergedJobDataMap["config"]
+            )
+        }
+    }
+
+    fun addJob(jobConfig: JobConfig): JobConfig {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
