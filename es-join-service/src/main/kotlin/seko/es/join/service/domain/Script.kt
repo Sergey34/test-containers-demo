@@ -18,6 +18,14 @@ data class Script(
         @JvmField
         val objectMapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
+        @JvmField
+        val VALIDATE_SCRIPT = { config: Any? ->
+            config == null || (config is List<*> && (config as List<Map<String, Any>>).all {
+                (it["field_name"] as String).isNotBlank()
+                        && (it["script"] as Map<String, String>).keys.containsAll(listOf("lang", "source"))
+            })
+        }
+
         fun from(config: Map<String, String>?): Script? {
             return config?.let { Script(it["lang"] as String, parseParams(it), it["source"] as String) }
         }

@@ -37,25 +37,28 @@
           ]
         }
       },
-      "processor": {
-        "type": "JOIN",
-        "config": {
-          "joins": [
-            {
-              "type": "LEFT_JOIN",
-              "index": "order-*",
-              "id_field": "id",
-              "target_field": "order"
-            },
-            {
-              "type": "SEARCH_JOIN",
-              "index": "order-*",
-              "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
-              "target_field": "order"
-            }
-          ]
+      "processors": [
+        {
+          "type": "JOIN",
+          "config": {
+            "index": "order-*",
+            "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
+            "target_field": "order",
+            "params": [
+              "id"
+            ],
+            "fetch_source": [
+              "like"
+            ]
+          }
+        },
+        {
+          "type": "JS",
+          "config": {
+            "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+          }
         }
-      },
+      ],
       "writer": {
         "type": "UPDATE",
         "config": {

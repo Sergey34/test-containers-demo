@@ -17,13 +17,17 @@ class EsItemJoinProcessor(
 
     override fun process(item: MutableMap<String, Any>): Map<String, Any> {
         val request = SearchTemplateRequest()
-        request.request = SearchRequest(joinProcessorConfig.index)
+        val searchRequest = SearchRequest(joinProcessorConfig.index)
+
+        request.request = searchRequest
         request.scriptType = ScriptType.INLINE
         request.script = joinProcessorConfig.query
         request.scriptParams = item.filterKeys { it in joinProcessorConfig.params }
 
+
         item[joinProcessorConfig.target_field] =
-            restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT).response.hits.hits
+            restHighLevelClient.searchTemplate(request, RequestOptions.DEFAULT)
+                .response.hits.hits.map { it.sourceAsMap }
         return item
     }
 }

@@ -2,6 +2,7 @@ package seko.es.join.service.domain
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import seko.es.join.service.domain.Script.Companion.VALIDATE_SCRIPT
 
 data class Writer(
     @JsonProperty("config")
@@ -35,6 +36,16 @@ data class Writer(
         val fieldWithDocId: String
     ) {
         companion object {
+            @JvmField
+            val ES_UPDATE_WRITER_CONFIG_VALIDATOR = { config: Map<String, *> ->
+                config["field_with_doc_id"] is String
+                        && config["field_with_doc_id"].toString().isNotBlank()
+                        && (config["target_field"] == null || (config["target_field"].toString().isNotBlank()))
+                        && (config["retry_on_conflict"] == null || config["retry_on_conflict"] is Int)
+                        && (config["doc_as_upsert"] == null || config["doc_as_upsert"] is Boolean)
+                        && VALIDATE_SCRIPT(config["script_fields"])
+            }
+
             fun from(config: Map<String, Any>): EsUpdateWriter {
                 return EsUpdateWriter(
                     Script.from(config["script"] as Map<String, String>?),

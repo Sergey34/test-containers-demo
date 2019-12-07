@@ -3,6 +3,8 @@ package seko.es.join.service.domain
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.elasticsearch.search.sort.SortOrder
+import seko.es.join.service.domain.Reader.Order.Companion.ORDER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.Script.Companion.VALIDATE_SCRIPT
 import java.lang.Long.parseLong
 
 data class Reader(
@@ -21,10 +23,17 @@ data class Reader(
         val type: SortOrder
     ) {
         companion object {
+            @JvmField
+            val ORDER_CONFIG_VALIDATOR = { config: Map<String, *>? ->
+                config == null || (config is Map<*, *> && (config as Map<*, *>).keys.containsAll(
+                    listOf("field", "type")
+                ))
+            }
+
             fun from(config: Map<String, Any>): Order {
                 return Order(
                     config["field"] as String,
-                    SortOrder.valueOf(config["order"] as String)
+                    SortOrder.valueOf(config["type"] as String)
                 )
             }
         }
@@ -43,6 +52,15 @@ data class Reader(
         val time: Long = 60_000L
     ) {
         companion object {
+            @JvmField
+            val ES_SCROLL_CONFIG_VALIDATOR = { config: Map<String, *> ->
+                config["query"] is String
+                        && config["query"].toString().isNotBlank()
+                        && (config["fields"] == null || (config["fields"] as List<String>).size > 0)
+                        && ORDER_CONFIG_VALIDATOR(config["order"] as Map<String, *>?)
+                        && VALIDATE_SCRIPT(config["script_fields"])
+            }
+
             fun from(config: Map<String, Any>): EsScrollReader {
                 val scriptFields = (config["script_fields"] as List<Map<String, Any>>?)
                     ?.map { ScriptField.from(it) } ?: listOf()

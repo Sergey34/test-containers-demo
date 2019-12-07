@@ -61,7 +61,13 @@ class EsScrollItemReader(
             searchResponse = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT)
             scrollId = searchResponse.scrollId
         }
-        val searchHits = searchResponse.hits.hits.map { it.sourceAsMap }
+        val searchHits = searchResponse.hits.hits.map {
+            it.sourceAsMap.apply {
+                it.fields.values.forEach { field ->
+                    put(field.name, field.values)
+                }
+            }
+        }
         return searchHits.iterator()
     }
 
