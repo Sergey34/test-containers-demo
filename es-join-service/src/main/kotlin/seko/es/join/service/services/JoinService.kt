@@ -1,8 +1,10 @@
 package seko.es.join.service.services
 
 import org.elasticsearch.client.RestHighLevelClient
+import org.elasticsearch.rest.RestStatus
 import org.elasticsearch.search.slice.SliceBuilder
 import org.quartz.*
+import org.quartz.JobKey
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.Step
@@ -26,6 +28,7 @@ import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProces
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
+import seko.es.join.service.services.config.parsing.JobConfigParser
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
 
@@ -35,7 +38,8 @@ class JoinService @Autowired constructor(
     val scheduler: Scheduler,
     val stepBuilderFactory: StepBuilderFactory,
     val restHighLevelClient: RestHighLevelClient,
-    var jobs: JobBuilderFactory
+    val jobs: JobBuilderFactory,
+    val parser: JobConfigParser
 ) {
     @EventListener(ContextRefreshedEvent::class)
     fun initScheduling() {
@@ -156,7 +160,24 @@ class JoinService @Autowired constructor(
         }
     }
 
-    fun addJob(jobConfig: JobConfig): JobConfig {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun addJob(jobConfig: JobConfig): RestStatus {
+        if (parser.validateJobConfig(jobConfig)) {
+            return esRepository.save(jobConfig)
+        } else {
+            throw IllegalArgumentException("Invalid config")
+        }
+    }
+
+    fun runJob(jobId: String) {
+        val jobKey = JobKey.jobKey(jobId, "namespace")
+        val jobExists = scheduler.checkExists(jobKey)
+        val jobDetail = if (jobExists) {
+            scheduler.getJobDetail(jobKey)
+        } else {
+            val job = esRepository.getJob(jobId)
+            buildJobDetail(job)
+        }
+        val runOnceTrigger = TriggerBuilder.newTrigger().build()
+        scheduler.scheduleJob(jobDetail, runOnceTrigger)
     }
 }

@@ -1,5 +1,6 @@
 package seko.es.join.service.api
 
+import org.elasticsearch.rest.RestStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,7 +23,12 @@ class JobController @Autowired constructor(
     }
 
     @PostMapping("/job")
-    fun addJob(jobConfig: JobConfig): JobConfig {
+    fun addJob(jobConfig: JobConfig): RestStatus {
         return joinService.addJob(jobConfig)
+    }
+
+    @PostMapping("/job/{jobId}")
+    fun runJob(jobId: String) {
+        joinService.runJob(jobId)
     }
 }

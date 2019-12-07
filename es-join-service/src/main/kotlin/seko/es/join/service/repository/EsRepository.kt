@@ -2,11 +2,15 @@ package seko.es.join.service.repository
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.elasticsearch.action.get.GetRequest
+import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.action.search.*
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.common.unit.TimeValue
+import org.elasticsearch.common.xcontent.XContentType
 import org.elasticsearch.index.query.QueryBuilders.matchAllQuery
+import org.elasticsearch.rest.RestStatus
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.slice.SliceBuilder
@@ -60,5 +64,23 @@ class EsRepository @Autowired constructor(
 
     fun getJobs(): List<JobConfig> {
         return objectMapper.readValue(File("t3.json").reader())
+    }
+
+    fun save(jobConfig: JobConfig): RestStatus {
+        val request = IndexRequest(".join")
+            .id(jobConfig.jobId)
+            .type("doc")
+            .source(objectMapper.writeValueAsString(jobConfig), XContentType.JSON)
+        val index = restHighLevelClient.index(request, RequestOptions.DEFAULT)
+        return index.status()
+    }
+
+    fun getJob(jobId: String): JobConfig {
+        return jobConfigParser.parse(
+            restHighLevelClient.get(
+                GetRequest(".join", "doc", jobId),
+                RequestOptions.DEFAULT
+            ).sourceAsString
+        )
     }
 }

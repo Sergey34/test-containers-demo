@@ -29,7 +29,7 @@ class JobConfigParser @Autowired constructor(
         }
     }
 
-    private fun validateJobConfig(jobConfig: JobConfig): Boolean {
+    fun validateJobConfig(jobConfig: JobConfig): Boolean {
         return jobConfig.steps.all {
             validate(it.reader.type, it.reader.config)
                     && validate(it.writer.type, it.writer.config)
