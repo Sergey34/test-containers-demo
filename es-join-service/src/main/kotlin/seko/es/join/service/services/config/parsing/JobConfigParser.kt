@@ -11,6 +11,7 @@ import seko.es.join.service.domain.Processor.ScriptProcessor.Companion.JS_PROCES
 import seko.es.join.service.domain.Reader
 import seko.es.join.service.domain.Reader.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
 import seko.es.join.service.domain.Writer
+import seko.es.join.service.domain.Writer.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
 import seko.es.join.service.domain.Writer.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
 import java.io.File
 
@@ -64,7 +65,8 @@ class JobConfigParser @Autowired constructor(
             Reader.ReaderType.ES_SCROLL to ES_SCROLL_CONFIG_VALIDATOR,
             Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
             Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR,
-            Processor.ProcessorType.JOIN to JOIN_PROCESSOR_CONFIG_VALIDATOR
+            Processor.ProcessorType.JOIN to JOIN_PROCESSOR_CONFIG_VALIDATOR,
+            Writer.WriterType.INDEX to ES_INDEX_WRITER_CONFIG_VALIDATOR
         )
     }
 }

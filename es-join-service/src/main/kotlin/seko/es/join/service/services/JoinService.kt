@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.core.step.tasklet.TaskletStep
 import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.item.ItemWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
@@ -22,6 +23,7 @@ import seko.es.join.service.services.batch.job.actions.processors.CompositeProce
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJoinProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
+import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
@@ -102,13 +104,11 @@ class JoinService @Autowired constructor(
         }
     }
 
-    private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): EsItemUpdateWriter {
+    private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): ItemWriter<Map<String, Any>> {
         val writerConfig = config.writer
-        when (writerConfig.type) {
-            Writer.WriterType.UPDATE -> {
-                return EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
-            }
-            Writer.WriterType.INSERT -> TODO()
+        return when (writerConfig.type) {
+            Writer.WriterType.UPDATE -> EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
+            Writer.WriterType.INDEX -> EsItemIndexWriter(restHighLevelClient, writerConfig, globalConfig)
             Writer.WriterType.UPDATE_BY_QUERY -> TODO()
             Writer.WriterType.UPDATE_BY_SCRIPT -> TODO()
         }

@@ -2,6 +2,7 @@ package seko.es.join.service.domain
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.elasticsearch.action.DocWriteRequest
 import seko.es.join.service.domain.Script.Companion.VALIDATE_SCRIPT
 
 data class Writer(
@@ -9,19 +10,6 @@ data class Writer(
     val config: Map<String, Any>,
     @JsonProperty("type")
     val type: WriterType
-
-
-//        @JsonProperty("conflicts")
-//        val conflicts: String?, // proceed
-//        @JsonProperty("query")
-//        val query: String?, // {"match_all": {}}
-//        @JsonProperty("routing")
-//        val routing: Int, // 1000
-//
-//        @JsonProperty("scroll_size")
-//        val scrollSize: Int?, // 1000
-//        @JsonProperty("slices")
-//        val slices: Int?, // 5
 ) {
     class EsUpdateWriter(
         @JsonProperty("script")
@@ -58,7 +46,28 @@ data class Writer(
         }
     }
 
+    data class EsIndexWriter(
+        val opType: DocWriteRequest.OpType = DocWriteRequest.OpType.CREATE,
+        val fieldWithDocId: String?
+    ) {
+        companion object {
+            @JvmField
+            val ES_INDEX_WRITER_CONFIG_VALIDATOR = { config: Map<String, *> ->
+                config["op_type"] is String
+                        && config["op_type"].toString().isNotBlank()
+                        && (config["field_with_doc_id"] == null || (config["field_with_doc_id"].toString().isNotBlank()))
+            }
+
+            fun from(config: Map<String, Any>): EsIndexWriter {
+                return EsIndexWriter(
+                    DocWriteRequest.OpType.valueOf(config["op_type"] as String),
+                    config["field_with_doc_id"] as String?
+                )
+            }
+        }
+    }
+
     enum class WriterType {
-        UPDATE_BY_QUERY, UPDATE, UPDATE_BY_SCRIPT, INSERT
+        UPDATE_BY_QUERY, UPDATE, UPDATE_BY_SCRIPT, INDEX
     }
 }
