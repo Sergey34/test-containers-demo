@@ -8,8 +8,8 @@ data class StepConfig(
     val chunkSize: Int = 1000, // 100
     @JsonProperty("id")
     val id: String, // tasks
-    @JsonProperty("processor")
-    val processor: Processor?,
+    @JsonProperty("processors")
+    val processors: List<Processor>?,
     @JsonProperty("reader")
     val reader: Reader,
     @JsonProperty("writer")

@@ -1,40 +1,73 @@
-[
-  {
-    "job_id": "1",
-    "job_name": "demo",
-    "job_description": "demo job",
-    "schedule": "0 * * * * ?",
-    "global_config": {
-      "target_index": "window"
-    },
-    "steps": [
-      {
-        "id": "errors",
-        "chunkSize": 5,
-        "reader": {
-          "type": "ES_SCROLL",
-          "index": "error-2018",
-          "query": "{\"match_all\": {}}"
-        },
-        "writer": {
-          "type": "UPDATE",
-          "id": "id"
+{
+  "job_id": "1",
+  "job_name": "demo",
+  "job_description": "demo job",
+  "schedule": "0 * * * * ?",
+  "global_config": {
+    "target_index": "window"
+  },
+  "steps": [
+    {
+      "id": "errors",
+      "chunkSize": 5,
+      "reader": {
+        "type": "ES_SCROLL",
+        "index": "error-2018",
+        "config": {
+          "time": 1000,
+          "query": "{\"match_all\": {}}",
+          "fields": [
+            "id",
+            "code",
+            "related_sales_order"
+          ],
+          "order": {
+            "field": "@timestamp",
+            "type": "ASC"
+          },
+          "script_fields": [
+            {
+              "field_name": "field_1",
+              "script": {
+                "lang": "painless",
+                "source": "doc['price'].value * 2 * params.factor",
+                "params": "{\"factor\": 2.0}"
+              }
+            }
+          ]
         }
       },
-      {
-        "id": "orders",
-        "chunkSize": 5,
-        "reader": {
-          "type": "ES_SCROLL",
-          "index": "order-2018",
-          "query": "{\"match_all\": {}}"
+      "processors": [
+        {
+          "type": "JOIN",
+          "config": {
+            "index": "order-*",
+            "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
+            "target_field": "order",
+            "params": [
+              "id"
+            ],
+            "fetch_source": [
+              "like"
+            ]
+          }
         },
-        "writer": {
-          "type": "UPDATE",
-          "id": "error_id",
-          "target_field": "order"
+        {
+          "type": "JS",
+          "config": {
+            "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+          }
+        }
+      ],
+      "writer": {
+        "type": "UPDATE",
+        "config": {
+          "doc_as_upsert": true,
+          "retry_on_conflict": 1,
+          "target_field": null,
+          "field_with_doc_id": "id"
         }
       }
-    ]
-  }
-]
+    }
+  ]
+}

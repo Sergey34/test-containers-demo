@@ -1,8 +1,5 @@
-package seko.es.join.service.services
+package seko.es.join.service.services.batch.job.actions.readers
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.elasticsearch.action.search.ClearScrollRequest
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.action.search.SearchResponse
@@ -18,40 +15,44 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
 import seko.es.join.service.domain.Reader
 
-
-class ElasticsearchItemReader(
+class EsScrollItemReader(
     private val restHighLevelClient: RestHighLevelClient,
-    private val readerConfig: Reader,
+    readerConfig: Reader,
     private val chunkSize: Int
-) : AbstractPaginatedDataItemReader<Map<*, *>>() {
+) : AbstractPaginatedDataItemReader<MutableMap<String, Any>>() {
+    private val config = Reader.EsScrollReader.from(readerConfig.config)
+    private val index = readerConfig.index
+
     private var scrollId: String? = null
     private lateinit var searchRequest: SearchRequest
-    private val mapper: ObjectMapper = ObjectMapper().registerModule(KotlinModule())
 
     override fun doOpen() {
-        searchRequest = SearchRequest(readerConfig.index)
+
+
+        searchRequest = SearchRequest(index)
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.size(chunkSize)
-        searchSourceBuilder.query(QueryBuilders.wrapperQuery(readerConfig.query))
-        readerConfig.fields?.let {
+        searchSourceBuilder.query(QueryBuilders.wrapperQuery(config.query))
+
+        config.fields.let {
             searchSourceBuilder.fetchSource(it.toTypedArray(), null)
         }
-        readerConfig.order?.let {
+        config.order?.let {
             searchSourceBuilder.sort(it.field, it.type)
         }
-        readerConfig.scriptFields.forEach {
-            val script = (it.script.params?.let { p -> mapper.readValue<Map<String, Any>>(p) }
+        config.scriptFields.forEach {
+            val script = it.script.params
                 ?.let { p -> Script(ScriptType.INLINE, it.script.lang, it.script.source, p) }
-                ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf()))
+                ?: Script(ScriptType.INLINE, it.script.lang, it.script.source, mapOf())
             searchSourceBuilder.scriptField(it.fieldName, script)
         }
         searchRequest.source(searchSourceBuilder)
 
-        val scroll = Scroll(TimeValue.timeValueMillis(readerConfig.time))
+        val scroll = Scroll(TimeValue.timeValueMillis(config.time))
         searchRequest.scroll(scroll)
     }
 
-    override fun doPageRead(): Iterator<Map<*, *>> {
+    override fun doPageRead(): Iterator<MutableMap<String, Any>> {
         val searchResponse: SearchResponse
         if (scrollId == null) {
             searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT)
@@ -62,16 +63,25 @@ class ElasticsearchItemReader(
             searchResponse = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT)
             scrollId = searchResponse.scrollId
         }
-        val searchHits = searchResponse.hits.hits.map { it.sourceAsMap }
+        val searchHits = searchResponse.hits.hits.map {
+            it.sourceAsMap.apply {
+                it.fields.values.forEach { field ->
+                    put(field.name, field.values)
+                }
+            }
+        }
         return searchHits.iterator()
     }
 
     override fun doClose() {
         if (scrollId != null) {
-            val clearScrollRequest = ClearScrollRequest()
-            clearScrollRequest.addScrollId(scrollId)
-            restHighLevelClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
-            scrollId = null
+            try {
+                val clearScrollRequest = ClearScrollRequest()
+                clearScrollRequest.addScrollId(scrollId)
+                restHighLevelClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT)
+            } finally {
+                scrollId = null
+            }
         }
     }
 }

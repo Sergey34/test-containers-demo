@@ -1,4 +1,4 @@
-package seko.es.join.service.services.jobs
+package seko.es.join.service.services.quartz.jobs
 
 import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class JoinJob @Autowired constructor(
     scheduler: Scheduler,
-    val jobLauncher: JobLauncher
+    private val jobLauncher: JobLauncher
 ) : AbstractJoinJob(scheduler) {
     override fun action(context: JobExecutionContext) {
         val job = context.mergedJobDataMap["job"] as Job

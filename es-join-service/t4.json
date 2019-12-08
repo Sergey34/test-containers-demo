@@ -1,0 +1,71 @@
+[
+  {
+    "job_id": "1",
+    "job_name": "demo",
+    "job_description": "demo job",
+    "schedule": "0 * * * * ?",
+    "global_config": {
+      "target_index": "window"
+    },
+    "steps": [
+      {
+        "id": "errors",
+        "chunkSize": 5,
+        "reader": {
+          "type": "ES_SCROLL",
+          "index": "error-2018",
+          "config": {
+            "time": "1000",
+            "query": "{\"match_all\": {}}",
+            "fields": [
+              "entity_type",
+              "id",
+              "likes",
+              "date"
+            ],
+            "order": {
+              "field": "date",
+              "type": "ASC"
+            },
+            "script_fields": [
+              {
+                "field_name": "field_1",
+                "script": {
+                  "lang": "painless",
+                  "source": "doc['likes'].value * 2 * params.factor",
+                  "params": "{\"factor\": 2.0}"
+                }
+              }
+            ]
+          }
+        },
+        "processor": [
+          {
+            "type": "JOIN",
+            "config": {
+              "type": "SEARCH_JOIN",
+              "index": "order-*",
+              "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
+              "target_field": "order"
+            }
+          },
+          {
+            "type": "JS",
+            "config": {
+              "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+            }
+          }
+        ],
+        "writer": {
+          "type": "UPDATE",
+          "config": {
+            "doc_as_upsert": true,
+            "retry_on_conflict": 1,
+            "target_field": null,
+            "field_with_doc_id": "id"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
-import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 
 @Configuration
@@ -24,7 +23,8 @@ class EsTestContainer {
         val port = esTestContainer.port
         println(port)
         return RestHighLevelClient(
-                RestClient.builder(HttpHost("localhost", port, "http")))
+            RestClient.builder(HttpHost("localhost", port, "http"))
+        )
     }
 
     @PreDestroy
