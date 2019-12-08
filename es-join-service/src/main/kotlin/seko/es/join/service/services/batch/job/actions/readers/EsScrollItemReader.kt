@@ -27,6 +27,8 @@ class EsScrollItemReader(
     private lateinit var searchRequest: SearchRequest
 
     override fun doOpen() {
+
+
         searchRequest = SearchRequest(index)
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.size(chunkSize)

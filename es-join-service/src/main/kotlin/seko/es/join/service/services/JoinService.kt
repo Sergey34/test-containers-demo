@@ -28,6 +28,7 @@ import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProces
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
+import seko.es.join.service.services.batch.job.listeners.JobPersistStatisticExecutionListener
 import seko.es.join.service.services.config.parsing.JobConfigParser
 import seko.es.join.service.services.quartz.jobs.JoinJob
 
@@ -39,11 +40,15 @@ class JoinService @Autowired constructor(
     val stepBuilderFactory: StepBuilderFactory,
     val restHighLevelClient: RestHighLevelClient,
     val jobs: JobBuilderFactory,
-    val parser: JobConfigParser
+    val parser: JobConfigParser,
+    val jobPersistStatisticExecutionListener: JobPersistStatisticExecutionListener
 ) {
+    private final lateinit var configs: List<JobConfig>
+
     @EventListener(ContextRefreshedEvent::class)
     fun initScheduling() {
-        esRepository.getJobs()
+        configs = esRepository.getJobs()
+        configs
             .forEach {
                 scheduler.scheduleJob(buildJobDetail(it), buildTrigger(it))
             }
@@ -88,6 +93,7 @@ class JoinService @Autowired constructor(
                 }
             }
         }
+        jobWithStep.listener(jobPersistStatisticExecutionListener)
         return jobWithStep.build()
     }
 
@@ -143,7 +149,7 @@ class JoinService @Autowired constructor(
     }
 
     fun getJobConfigs(): List<JobConfig> {
-        return esRepository.getConfig(getSliceConfig())
+        return configs
     }
 
     private fun getSliceConfig(): SliceBuilder {
