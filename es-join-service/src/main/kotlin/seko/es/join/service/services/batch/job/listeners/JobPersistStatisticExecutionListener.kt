@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class JobPersistStatisticExecutionListener @Autowired constructor(
-    val restHighLevelClient: RestHighLevelClient
+    private val restHighLevelClient: RestHighLevelClient
 ) : JobExecutionListener {
     override fun beforeJob(jobExecution: JobExecution) {
         jobExecution.executionContext.put("start", 123)

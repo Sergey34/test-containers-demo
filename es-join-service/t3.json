@@ -41,17 +41,21 @@
         },
         "processors": [
           {
-            "type": "JOIN",
+            "type": "MULTI_JOIN",
             "config": {
-              "index": "order-*",
-              "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
-              "target_field": "order",
-              "params": [
-                "id"
-              ],
-              "include_fields": [
-                "likes",
-                "message"
+              "configs": [
+                {
+                  "index": "order-*",
+                  "query": "{\"query\": {\"term\": {\"error_id.keyword\": {\"value\": \"{{id}}\"}}}}",
+                  "target_field": "order",
+                  "params": [
+                    "id"
+                  ],
+                  "include_fields": [
+                    "likes",
+                    "message"
+                  ]
+                }
               ]
             }
           },
