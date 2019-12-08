@@ -6,29 +6,29 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import seko.es.join.service.domain.JobConfig
-import seko.es.join.service.services.JoinService
+import seko.es.join.service.services.JobService
 
 @RestController
 class JobController @Autowired constructor(
-    private val joinService: JoinService
+    private val jobService: JobService
 ) {
     @GetMapping("/job/configs")
     fun getJobConfigs(): List<JobConfig> {
-        return joinService.getJobConfigs()
+        return jobService.getJobConfigs()
     }
 
     @GetMapping("/job/CurrentlyExecutingJobs")
     fun getCurrentlyExecutingJobs(): List<Map<String, Any?>> {
-        return joinService.getCurrentlyExecutingJobs()
+        return jobService.getCurrentlyExecutingJobs()
     }
 
     @PostMapping("/job")
     fun addJob(jobConfig: JobConfig): RestStatus {
-        return joinService.addJob(jobConfig)
+        return jobService.addJob(jobConfig)
     }
 
     @PostMapping("/job/{jobId}")
     fun runJob(jobId: String) {
-        joinService.runJob(jobId)
+        jobService.runJob(jobId)
     }
 }

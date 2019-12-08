@@ -19,12 +19,12 @@ import org.springframework.context.event.ContextRefreshedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.*
-import seko.es.join.service.domain.Processor.ProcessorType.JOIN
-import seko.es.join.service.domain.Processor.ProcessorType.JS
+import seko.es.join.service.domain.Processor.ProcessorType.*
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.CompositeProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJoinProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
+import seko.es.join.service.services.batch.job.actions.processors.EsMultiItemJoinProcessor
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
@@ -34,7 +34,7 @@ import seko.es.join.service.services.quartz.jobs.JoinJob
 
 
 @Service
-class JoinService @Autowired constructor(
+class JobService @Autowired constructor(
     val esRepository: EsRepository,
     val scheduler: Scheduler,
     val stepBuilderFactory: StepBuilderFactory,
@@ -77,8 +77,7 @@ class JoinService @Autowired constructor(
     }
 
     private fun createJobParams(jobConfig: JobConfig): JobParametersBuilder {
-        return JobParametersBuilder()
-            .addString("JobID", jobConfig.jobId)
+        return JobParametersBuilder().addString("JobID", jobConfig.jobId)
     }
 
     private fun getJob(jobConfig: JobConfig): Job {
@@ -88,9 +87,7 @@ class JoinService @Autowired constructor(
         val jobWithStep = jb.start(steps.first())
         if (steps.size > 1) {
             jobWithStep.apply {
-                steps.subList(1, steps.size).forEach { step ->
-                    next(step)
-                }
+                steps.subList(1, steps.size).forEach { next(it) }
             }
         }
         jobWithStep.listener(jobPersistStatisticExecutionListener)
@@ -131,6 +128,7 @@ class JoinService @Autowired constructor(
             when (it.type) {
                 JS -> EsItemJsProcessor(it)
                 JOIN -> EsItemJoinProcessor(it, restHighLevelClient)
+                MULTI_JOIN -> EsMultiItemJoinProcessor(it, restHighLevelClient)
             }
         }?.let {
             CompositeProcessor(it)

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
 import seko.es.join.service.domain.JobConfig
 import seko.es.join.service.domain.Processor
 import seko.es.join.service.domain.Processor.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.Processor.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.Processor.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.Reader
 import seko.es.join.service.domain.Reader.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
@@ -66,7 +67,8 @@ class JobConfigParser @Autowired constructor(
             Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
             Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR,
             Processor.ProcessorType.JOIN to JOIN_PROCESSOR_CONFIG_VALIDATOR,
-            Writer.WriterType.INDEX to ES_INDEX_WRITER_CONFIG_VALIDATOR
+            Writer.WriterType.INDEX to ES_INDEX_WRITER_CONFIG_VALIDATOR,
+            Processor.ProcessorType.MULTI_JOIN to MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
         )
     }
 }
