@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer
 import org.springframework.batch.core.step.tasklet.TaskletStep
 import org.springframework.batch.item.ItemProcessor
+import org.springframework.batch.item.ItemReader
 import org.springframework.batch.item.ItemWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -22,6 +23,8 @@ import seko.es.join.service.domain.writers.WriterType
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.*
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
+import seko.es.join.service.services.batch.job.actions.readers.IndicesReader
+import seko.es.join.service.services.batch.job.actions.writers.DeleteIndices
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.batch.job.listeners.JobPersistStatisticExecutionListener
@@ -81,6 +84,7 @@ class BatchJobConfigService @Autowired constructor(
         return when (WriterType.valueOf(writerConfig.type)) {
             WriterType.UPDATE -> EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
             WriterType.INDEX -> EsItemIndexWriter(restHighLevelClient, writerConfig, globalConfig)
+            WriterType.INDEX_DELETE -> DeleteIndices(restHighLevelClient)
             WriterType.UPDATE_BY_QUERY -> TODO()
             WriterType.UPDATE_BY_SCRIPT -> TODO()
         }
@@ -97,11 +101,15 @@ class BatchJobConfigService @Autowired constructor(
         }?.let { CompositeProcessor(it) }
     }
 
-    private fun createReader(config: StepConfig): EsScrollItemReader {
+    private fun createReader(config: StepConfig): ItemReader<MutableMap<String, Any>> {
         val readerConfig = config.reader
         return when (ReaderType.valueOf(readerConfig.type)) {
             ReaderType.ES_SCROLL -> {
                 EsScrollItemReader(restHighLevelClient, readerConfig, config.chunkSize)
+                    .apply { setName(config.id) }
+            }
+            ReaderType.ES_INDICES -> {
+                IndicesReader(restHighLevelClient, readerConfig)
                     .apply { setName(config.id) }
             }
         }

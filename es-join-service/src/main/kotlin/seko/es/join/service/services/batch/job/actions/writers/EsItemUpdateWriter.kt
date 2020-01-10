@@ -43,7 +43,6 @@ class EsItemUpdateWriter(
             .forEach { bulkRequest.add(it) }
 
         val bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT)
-        println(bulk)
     }
 
 }

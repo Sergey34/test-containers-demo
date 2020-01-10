@@ -11,7 +11,9 @@ import seko.es.join.service.domain.processors.MultiJoinProcessor.Companion.MULTI
 import seko.es.join.service.domain.processors.ProcessorType
 import seko.es.join.service.domain.processors.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.readers.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
+import seko.es.join.service.domain.readers.IndicesReader.Companion.INDEX_CONFIG_VALIDATOR
 import seko.es.join.service.domain.readers.ReaderType
+import seko.es.join.service.domain.writers.DeleteIndices.Companion.ES_DELETE_CONFIG_VALIDATOR
 import seko.es.join.service.domain.writers.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
 import seko.es.join.service.domain.writers.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
 import seko.es.join.service.domain.writers.WriterType
@@ -65,11 +67,13 @@ class JobConfigParser @Autowired constructor(
         @JvmField
         val VALIDATORS: Map<String, (Map<String, *>) -> Boolean> = mapOf(
             ReaderType.ES_SCROLL.toString() to ES_SCROLL_CONFIG_VALIDATOR,
+            ReaderType.ES_INDICES.toString() to INDEX_CONFIG_VALIDATOR,
             WriterType.UPDATE.toString() to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
             ProcessorType.JS.toString() to JS_PROCESSOR_CONFIG_VALIDATOR,
             ProcessorType.FILTER.toString() to SCRIPT_PROCESSOR_CONFIG_VALIDATOR,
             ProcessorType.JOIN.toString() to JOIN_PROCESSOR_CONFIG_VALIDATOR,
             WriterType.INDEX.toString() to ES_INDEX_WRITER_CONFIG_VALIDATOR,
+            WriterType.INDEX_DELETE.toString() to ES_DELETE_CONFIG_VALIDATOR,
             ProcessorType.MULTI_JOIN.toString() to MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
         )
     }

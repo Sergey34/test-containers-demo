@@ -9,6 +9,21 @@
     },
     "steps": [
       {
+        "id": "indices_1",
+        "chunkSize": 5,
+        "reader": {
+          "type": "ES_INDICES",
+          "es_scroll_config": {
+            "index": [
+              "*-2018"
+            ]
+          }
+        },
+        "writer": {
+          "type": "INDEX_DELETE"
+        }
+      },
+      {
         "id": "errors",
         "chunkSize": 5,
         "reader": {
