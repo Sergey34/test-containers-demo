@@ -13,23 +13,21 @@ import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
-import seko.es.join.service.domain.Reader
+import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.readers.EsScrollReader
 
 class EsScrollItemReader(
     private val restHighLevelClient: RestHighLevelClient,
-    readerConfig: Reader,
+    readerConfig: Configuration,
     private val chunkSize: Int
 ) : AbstractPaginatedDataItemReader<MutableMap<String, Any>>() {
-    private val config = Reader.EsScrollReader.from(readerConfig.config)
-    private val index = readerConfig.index
+    private val config = EsScrollReader.from(readerConfig.config)
 
     private var scrollId: String? = null
     private lateinit var searchRequest: SearchRequest
 
     override fun doOpen() {
-
-
-        searchRequest = SearchRequest(index)
+        searchRequest = SearchRequest(config.index)
         val searchSourceBuilder = SearchSourceBuilder()
         searchSourceBuilder.size(chunkSize)
         searchSourceBuilder.query(QueryBuilders.wrapperQuery(config.query))

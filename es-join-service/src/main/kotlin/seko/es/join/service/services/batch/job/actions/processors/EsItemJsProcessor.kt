@@ -2,12 +2,13 @@ package seko.es.join.service.services.batch.job.actions.processors
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory
 import org.springframework.batch.item.ItemProcessor
-import seko.es.join.service.domain.Processor
+import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.processors.ScriptProcessor
 import javax.script.Invocable
 
 
-class EsItemJsProcessor(processor: Processor) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
-    private val scriptProcessorConfig: Processor.ScriptProcessor = Processor.ScriptProcessor.from(processor.config)
+class EsItemJsProcessor(processor: Configuration) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
+    private val scriptProcessorConfig: ScriptProcessor = ScriptProcessor.from(processor.config)
     private val inv: Invocable
 
     init {

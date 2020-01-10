@@ -5,17 +5,17 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.batch.item.ItemWriter
+import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.GlobalConfig
-import seko.es.join.service.domain.Writer
+import seko.es.join.service.domain.writers.EsIndexWriter
 
 
 class EsItemIndexWriter(
     private val client: RestHighLevelClient,
-    writerConfig: Writer,
+    writerConfig: Configuration,
     private val globalConfig: GlobalConfig
 ) : ItemWriter<Map<String, Any>> {
-
-    private val indexWriterConfig: Writer.EsIndexWriter = Writer.EsIndexWriter.from(writerConfig.config)
+    private val indexWriterConfig: EsIndexWriter = EsIndexWriter.from(writerConfig.config)
 
     override fun write(items: MutableList<out Map<String, Any>>) {
         val bulkRequest = BulkRequest()

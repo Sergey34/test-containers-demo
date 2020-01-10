@@ -2,13 +2,14 @@ package seko.es.join.service.services.batch.job.actions.processors
 
 import org.junit.Assert
 import org.junit.jupiter.api.Test
-import seko.es.join.service.domain.Processor
+import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.processors.ProcessorType
 
 internal class EsItemJsProcessorTest {
 
     @Test
     fun process() {
-        val processor = Processor(Processor.ProcessorType.JS, mapOf("script" to """
+        val processor = Configuration(ProcessorType.JS.toString(), mutableMapOf("script" to """
             function process(source) { 
               source.qweqweq = 12312312; 
               return source;

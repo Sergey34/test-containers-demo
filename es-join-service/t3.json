@@ -13,8 +13,8 @@
         "chunkSize": 5,
         "reader": {
           "type": "ES_SCROLL",
-          "index": "error-2018",
-          "config": {
+          "es_scroll_config": {
+            "index": "error-2018",
             "time": "1000",
             "query": "{\"match_all\": {}}",
             "fields": [
@@ -42,7 +42,7 @@
         "processors": [
           {
             "type": "MULTI_JOIN",
-            "config": {
+            "multi_join_config": {
               "configs": [
                 {
                   "index": "order-*",
@@ -61,14 +61,14 @@
           },
           {
             "type": "JS",
-            "config": {
+            "js_config": {
               "script": "function process(source) {source.qweqweq = 12312312;return source;}"
             }
           }
         ],
         "writer": {
           "type": "UPDATE",
-          "config": {
+          "update_config": {
             "doc_as_upsert": true,
             "retry_on_conflict": 1,
             "target_field": null,

@@ -13,7 +13,12 @@ import org.springframework.batch.item.ItemProcessor
 import org.springframework.batch.item.ItemWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import seko.es.join.service.domain.*
+import seko.es.join.service.domain.GlobalConfig
+import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.StepConfig
+import seko.es.join.service.domain.processors.ProcessorType
+import seko.es.join.service.domain.readers.ReaderType
+import seko.es.join.service.domain.writers.WriterType
 import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.CompositeProcessor
 import seko.es.join.service.services.batch.job.actions.processors.EsItemJoinProcessor
@@ -76,28 +81,28 @@ class BatchJobConfigService @Autowired constructor(
 
     private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): ItemWriter<Map<String, Any>> {
         val writerConfig = config.writer
-        return when (writerConfig.type) {
-            Writer.WriterType.UPDATE -> EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
-            Writer.WriterType.INDEX -> EsItemIndexWriter(restHighLevelClient, writerConfig, globalConfig)
-            Writer.WriterType.UPDATE_BY_QUERY -> TODO()
-            Writer.WriterType.UPDATE_BY_SCRIPT -> TODO()
+        return when (WriterType.valueOf(writerConfig.type)) {
+            WriterType.UPDATE -> EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
+            WriterType.INDEX -> EsItemIndexWriter(restHighLevelClient, writerConfig, globalConfig)
+            WriterType.UPDATE_BY_QUERY -> TODO()
+            WriterType.UPDATE_BY_SCRIPT -> TODO()
         }
     }
 
     private fun createProcessor(config: StepConfig): ItemProcessor<MutableMap<String, Any>, Map<String, Any>>? {
         return config.processors?.map {
-            when (it.type) {
-                Processor.ProcessorType.JS -> EsItemJsProcessor(it)
-                Processor.ProcessorType.JOIN -> EsItemJoinProcessor(it, restHighLevelClient)
-                Processor.ProcessorType.MULTI_JOIN -> EsMultiItemJoinProcessor(it, restHighLevelClient)
+            when (ProcessorType.valueOf(it.type)) {
+                ProcessorType.JS -> EsItemJsProcessor(it)
+                ProcessorType.JOIN -> EsItemJoinProcessor(it, restHighLevelClient)
+                ProcessorType.MULTI_JOIN -> EsMultiItemJoinProcessor(it, restHighLevelClient)
             }
         }?.let { CompositeProcessor(it) }
     }
 
     private fun createReader(config: StepConfig): EsScrollItemReader {
         val readerConfig = config.reader
-        return when (readerConfig.type) {
-            Reader.ReaderType.ES_SCROLL -> {
+        return when (ReaderType.valueOf(readerConfig.type)) {
+            ReaderType.ES_SCROLL -> {
                 EsScrollItemReader(restHighLevelClient, readerConfig, config.chunkSize)
                     .apply { setName(config.id) }
             }

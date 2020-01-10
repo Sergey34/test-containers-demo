@@ -5,15 +5,15 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import seko.es.join.service.domain.JobConfig
-import seko.es.join.service.domain.Processor
-import seko.es.join.service.domain.Processor.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.Processor.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.Processor.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.Reader
-import seko.es.join.service.domain.Reader.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
-import seko.es.join.service.domain.Writer
-import seko.es.join.service.domain.Writer.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
-import seko.es.join.service.domain.Writer.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.processors.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.processors.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.processors.ProcessorType
+import seko.es.join.service.domain.processors.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.readers.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
+import seko.es.join.service.domain.readers.ReaderType
+import seko.es.join.service.domain.writers.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.writers.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.writers.WriterType
 import java.io.File
 
 @Component
@@ -33,12 +33,12 @@ class JobConfigParser @Autowired constructor(
     fun validateJobConfig(jobConfig: JobConfig): Boolean {
         return jobConfig.steps.all {
             validate(it.reader.type, it.reader.config)
-                    && validate(it.writer.type, it.writer.config)
-                    && it.processors?.all { p -> validate(p.type, p.config) } ?: true
+                && validate(it.writer.type, it.writer.config)
+                && it.processors?.all { p -> validate(p.type, p.config) } ?: true
         }
     }
 
-    fun validate(type: Enum<*>, config: Map<String, *>): Boolean {
+    fun validate(type: String, config: Map<String, *>): Boolean {
         return VALIDATORS[type]?.invoke(config) ?: false
     }
 
@@ -62,13 +62,13 @@ class JobConfigParser @Autowired constructor(
 
     companion object {
         @JvmField
-        val VALIDATORS: Map<Enum<*>, (Map<String, *>) -> Boolean> = mapOf(
-            Reader.ReaderType.ES_SCROLL to ES_SCROLL_CONFIG_VALIDATOR,
-            Writer.WriterType.UPDATE to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
-            Processor.ProcessorType.JS to JS_PROCESSOR_CONFIG_VALIDATOR,
-            Processor.ProcessorType.JOIN to JOIN_PROCESSOR_CONFIG_VALIDATOR,
-            Writer.WriterType.INDEX to ES_INDEX_WRITER_CONFIG_VALIDATOR,
-            Processor.ProcessorType.MULTI_JOIN to MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
+        val VALIDATORS: Map<String, (Map<String, *>) -> Boolean> = mapOf(
+            ReaderType.ES_SCROLL.toString() to ES_SCROLL_CONFIG_VALIDATOR,
+            WriterType.UPDATE.toString() to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
+            ProcessorType.JS.toString() to JS_PROCESSOR_CONFIG_VALIDATOR,
+            ProcessorType.JOIN.toString() to JOIN_PROCESSOR_CONFIG_VALIDATOR,
+            WriterType.INDEX.toString() to ES_INDEX_WRITER_CONFIG_VALIDATOR,
+            ProcessorType.MULTI_JOIN.toString() to MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
         )
     }
 }

@@ -6,14 +6,15 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.script.ScriptType
 import org.elasticsearch.script.mustache.SearchTemplateRequest
 import org.springframework.batch.item.ItemProcessor
-import seko.es.join.service.domain.Processor
+import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.processors.JoinProcessor
 
 
 class EsItemJoinProcessor(
-    processor: Processor,
+    processor: Configuration,
     private val restHighLevelClient: RestHighLevelClient
 ) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
-    private val joinProcessorConfig: Processor.JoinProcessor = Processor.JoinProcessor.from(processor.config)
+    private val joinProcessorConfig: JoinProcessor = JoinProcessor.from(processor.config)
 
     override fun process(item: MutableMap<String, Any>): Map<String, Any> {
         val request = SearchTemplateRequest()

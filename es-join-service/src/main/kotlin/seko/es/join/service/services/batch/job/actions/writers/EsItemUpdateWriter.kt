@@ -7,19 +7,20 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
 import org.springframework.batch.item.ItemWriter
+import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.GlobalConfig
-import seko.es.join.service.domain.Writer
+import seko.es.join.service.domain.writers.EsUpdateWriter
 
 class EsItemUpdateWriter(
     private val client: RestHighLevelClient,
-    writerConfig: Writer,
+    writerConfig: Configuration,
     private val globalConfig: GlobalConfig
 ) : ItemWriter<Map<String, Any>> {
     companion object {
         const val TYPE: String = "doc"
     }
 
-    private val updateWriterConfig: Writer.EsUpdateWriter = Writer.EsUpdateWriter.from(writerConfig.config)
+    private val updateWriterConfig: EsUpdateWriter = EsUpdateWriter.from(writerConfig.config)
 
     override fun write(items: MutableList<out Map<String, Any>>) {
         val bulkRequest = BulkRequest()

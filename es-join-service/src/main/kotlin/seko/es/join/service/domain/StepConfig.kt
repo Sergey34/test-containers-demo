@@ -9,9 +9,9 @@ data class StepConfig(
     @JsonProperty("id")
     val id: String, // tasks
     @JsonProperty("processors")
-    val processors: List<Processor>?,
+    val processors: List<Configuration>?,
     @JsonProperty("reader")
-    val reader: Reader,
+    val reader: Configuration,
     @JsonProperty("writer")
-    val writer: Writer
+    val writer: Configuration
 )

@@ -7,18 +7,20 @@ import org.elasticsearch.script.ScriptType
 import org.elasticsearch.script.mustache.MultiSearchTemplateRequest
 import org.elasticsearch.script.mustache.SearchTemplateRequest
 import org.springframework.batch.item.ItemProcessor
-import seko.es.join.service.domain.Processor
+import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.processors.JoinProcessor
+import seko.es.join.service.domain.processors.MultiJoinProcessor
 
 class EsMultiItemJoinProcessor(
-    processor: Processor,
+    processor: Configuration,
     private val restHighLevelClient: RestHighLevelClient
 ) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
-    private val joinProcessorConfig: Processor.MultiJoinProcessor = Processor.MultiJoinProcessor.from(processor.config)
+    private val joinProcessorConfig: MultiJoinProcessor = MultiJoinProcessor.from(processor.config)
 
     override fun process(item: MutableMap<String, Any>): Map<String, Any> {
         val requests = MultiSearchTemplateRequest()
 
-        val configs: List<Processor.JoinProcessor> = joinProcessorConfig.configs
+        val configs: List<JoinProcessor> = joinProcessorConfig.configs
         configs.forEach { jp ->
             val request = SearchTemplateRequest()
             val searchRequest = SearchRequest(jp.index)
