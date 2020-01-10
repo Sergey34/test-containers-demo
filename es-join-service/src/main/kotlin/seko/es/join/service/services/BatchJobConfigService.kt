@@ -20,10 +20,7 @@ import seko.es.join.service.domain.processors.ProcessorType
 import seko.es.join.service.domain.readers.ReaderType
 import seko.es.join.service.domain.writers.WriterType
 import seko.es.join.service.repository.EsRepository
-import seko.es.join.service.services.batch.job.actions.processors.CompositeProcessor
-import seko.es.join.service.services.batch.job.actions.processors.EsItemJoinProcessor
-import seko.es.join.service.services.batch.job.actions.processors.EsItemJsProcessor
-import seko.es.join.service.services.batch.job.actions.processors.EsMultiItemJoinProcessor
+import seko.es.join.service.services.batch.job.actions.processors.*
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
@@ -93,6 +90,7 @@ class BatchJobConfigService @Autowired constructor(
         return config.processors?.map {
             when (ProcessorType.valueOf(it.type)) {
                 ProcessorType.JS -> EsItemJsProcessor(it)
+                ProcessorType.FILTER -> FilterProcessor(it)
                 ProcessorType.JOIN -> EsItemJoinProcessor(it, restHighLevelClient)
                 ProcessorType.MULTI_JOIN -> EsMultiItemJoinProcessor(it, restHighLevelClient)
             }

@@ -5,8 +5,10 @@ import org.springframework.batch.item.ItemProcessor
 class CompositeProcessor constructor(
     private val processors: List<ItemProcessor<MutableMap<String, Any>, Map<String, Any>>>
 ) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
-    override fun process(item: MutableMap<String, Any>): Map<String, Any> {
-        processors.forEach { it.process(item) }
+    override fun process(item: MutableMap<String, Any>): Map<String, Any>? {
+        for (processor in processors) {
+            processor.process(item) ?: return null
+        }
         return item
     }
 }

@@ -64,6 +64,12 @@
             "js_config": {
               "script": "function process(source) {source.qweqweq = 12312312;return source;}"
             }
+          },
+          {
+            "type": "FILTER",
+            "js_config": {
+              "script": "function filter(source) {return true;}"
+            }
           }
         ],
         "writer": {

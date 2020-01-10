@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.processors.FilterProcessor.Companion.SCRIPT_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.processors.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.processors.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
 import seko.es.join.service.domain.processors.ProcessorType
@@ -66,6 +67,7 @@ class JobConfigParser @Autowired constructor(
             ReaderType.ES_SCROLL.toString() to ES_SCROLL_CONFIG_VALIDATOR,
             WriterType.UPDATE.toString() to ES_UPDATE_WRITER_CONFIG_VALIDATOR,
             ProcessorType.JS.toString() to JS_PROCESSOR_CONFIG_VALIDATOR,
+            ProcessorType.FILTER.toString() to SCRIPT_PROCESSOR_CONFIG_VALIDATOR,
             ProcessorType.JOIN.toString() to JOIN_PROCESSOR_CONFIG_VALIDATOR,
             WriterType.INDEX.toString() to ES_INDEX_WRITER_CONFIG_VALIDATOR,
             ProcessorType.MULTI_JOIN.toString() to MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR

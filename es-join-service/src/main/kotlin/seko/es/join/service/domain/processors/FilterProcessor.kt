@@ -2,18 +2,18 @@ package seko.es.join.service.domain.processors
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class ScriptProcessor(
+data class FilterProcessor(
     @JsonProperty("script")
     val script: String
 ) {
     companion object {
         @JvmField
-        val JS_PROCESSOR_CONFIG_VALIDATOR = { config: Map<String, *> ->
+        val SCRIPT_PROCESSOR_CONFIG_VALIDATOR = { config: Map<String, *> ->
             config["script"] is String
         }
 
-        fun from(config: Map<String, *>): ScriptProcessor {
-            return ScriptProcessor(config["script"] as String)
+        fun from(config: Map<String, *>): FilterProcessor {
+            return FilterProcessor(config["script"] as String)
         }
     }
 }
