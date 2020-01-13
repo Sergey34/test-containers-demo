@@ -1,9 +1,9 @@
 package seko.es.join.service.services.batch.job.actions.processors
 
 import org.springframework.batch.item.ItemProcessor
-import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.processors.ScriptProcessor
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.processors.ScriptProcessor
 import seko.es.join.service.services.InvocableFactory
 import javax.script.Invocable
 
@@ -16,7 +16,11 @@ class EsItemJsProcessor(processor: Configuration) : ItemProcessor<Item, Item> {
         inv = InvocableFactory.getInvocable(scriptProcessorConfig.script)
     }
 
+    companion object {
+        const val METHOD_NAME = "process"
+    }
+
     override fun process(item: Item): Item? {
-        return inv.invokeFunction("process", item) as Item?
+        return inv.invokeFunction(METHOD_NAME, item) as Item?
     }
 }

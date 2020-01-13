@@ -13,9 +13,9 @@ import org.elasticsearch.script.ScriptType
 import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
-import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.readers.EsScrollReader
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.readers.EsScrollReader
 
 class EsScrollItemReader(
     private val restHighLevelClient: RestHighLevelClient,

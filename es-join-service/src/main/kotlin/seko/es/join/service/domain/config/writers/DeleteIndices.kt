@@ -1,9 +1,9 @@
-package seko.es.join.service.domain.writers
+package seko.es.join.service.domain.config.writers
 
-class DeleteDocument {
+class DeleteIndices {
     companion object {
         @JvmField
-        val ES_DELETE_DOCUMENTS_CONFIG_VALIDATOR = { config: Map<String, *> ->
+        val ES_DELETE_INDICES_CONFIG_VALIDATOR = { config: Map<String, *> ->
             true
         }
 

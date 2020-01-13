@@ -4,20 +4,21 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import seko.es.join.service.domain.JobConfig
-import seko.es.join.service.domain.processors.FilterProcessor.Companion.SCRIPT_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.processors.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.processors.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.processors.ProcessorType
-import seko.es.join.service.domain.processors.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
-import seko.es.join.service.domain.readers.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
-import seko.es.join.service.domain.readers.IndicesReader.Companion.INDEX_CONFIG_VALIDATOR
-import seko.es.join.service.domain.readers.ReaderType
-import seko.es.join.service.domain.writers.DeleteDocument.Companion.ES_DELETE_DOCUMENTS_CONFIG_VALIDATOR
-import seko.es.join.service.domain.writers.DeleteIndices.Companion.ES_DELETE_INDICES_CONFIG_VALIDATOR
-import seko.es.join.service.domain.writers.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
-import seko.es.join.service.domain.writers.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
-import seko.es.join.service.domain.writers.WriterType
+import seko.es.join.service.domain.config.JobConfig
+import seko.es.join.service.domain.config.processors.FilterProcessor.Companion.SCRIPT_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.processors.JoinProcessor.Companion.JOIN_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.processors.MultiJoinProcessor.Companion.MULTI_JOIN_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.processors.ProcessorType
+import seko.es.join.service.domain.config.processors.ScriptProcessor.Companion.JS_PROCESSOR_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.readers.EsScrollReader.Companion.ES_SCROLL_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.readers.IndicesReader.Companion.INDEX_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.readers.ReaderType
+import seko.es.join.service.domain.config.writers.DeleteDocument.Companion.ES_DELETE_DOCUMENTS_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.writers.DeleteIndices.Companion.ES_DELETE_INDICES_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.writers.EsIndexWriter.Companion.ES_INDEX_WRITER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.writers.EsUpdateWriter.Companion.ES_UPDATE_WRITER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.writers.WriterType
+import seko.es.join.service.services.exceptions.InvalidConfigException
 import java.io.File
 
 @Component
@@ -30,7 +31,7 @@ class JobConfigParser @Autowired constructor(
         return if (isValidConfig) {
             jobConfig
         } else {
-            throw IllegalStateException("Invalid config")
+            throw InvalidConfigException()
         }
     }
 
@@ -60,7 +61,7 @@ class JobConfigParser @Autowired constructor(
         return if (isValidConfigs) {
             jobConfigs
         } else {
-            throw IllegalStateException("Invalid config")
+            throw InvalidConfigException()
         }
     }
 

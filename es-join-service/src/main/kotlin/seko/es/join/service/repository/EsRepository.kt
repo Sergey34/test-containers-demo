@@ -16,8 +16,9 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.elasticsearch.search.slice.SliceBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
-import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.config.JobConfig
 import seko.es.join.service.services.config.parsing.JobConfigParser
+import seko.es.join.service.services.constants.EsConstants.Companion.DOC_TYPE
 import java.io.File
 
 
@@ -69,7 +70,7 @@ class EsRepository @Autowired constructor(
     fun save(jobConfig: JobConfig): RestStatus {
         val request = IndexRequest(".join")
             .id(jobConfig.jobId)
-            .type("doc")
+            .type(DOC_TYPE)
             .source(objectMapper.writeValueAsString(jobConfig), XContentType.JSON)
         val index = restHighLevelClient.index(request, RequestOptions.DEFAULT)
         return index.status()
@@ -78,7 +79,7 @@ class EsRepository @Autowired constructor(
     fun getJob(jobId: String): JobConfig {
         return jobConfigParser.parse(
             restHighLevelClient.get(
-                GetRequest(".join", "doc", jobId),
+                GetRequest(".join", DOC_TYPE, jobId),
                 RequestOptions.DEFAULT
             ).sourceAsString
         )

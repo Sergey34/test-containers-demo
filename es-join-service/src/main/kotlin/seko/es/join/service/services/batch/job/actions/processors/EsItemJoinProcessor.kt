@@ -6,9 +6,9 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.script.ScriptType
 import org.elasticsearch.script.mustache.SearchTemplateRequest
 import org.springframework.batch.item.ItemProcessor
-import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.processors.JoinProcessor
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.processors.JoinProcessor
 
 
 class EsItemJoinProcessor(

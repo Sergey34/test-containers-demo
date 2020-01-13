@@ -1,4 +1,4 @@
-package seko.es.join.service.domain.processors
+package seko.es.join.service.domain.config.processors
 
 data class MultiJoinProcessor(
     val configs: List<JoinProcessor>

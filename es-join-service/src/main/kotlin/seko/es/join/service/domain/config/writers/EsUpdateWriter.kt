@@ -1,7 +1,7 @@
-package seko.es.join.service.domain.writers
+package seko.es.join.service.domain.config.writers
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import seko.es.join.service.domain.Script
+import seko.es.join.service.domain.config.Script
 
 class EsUpdateWriter(
     @JsonProperty("script")

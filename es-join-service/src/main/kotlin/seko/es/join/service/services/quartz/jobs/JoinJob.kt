@@ -7,6 +7,8 @@ import org.springframework.batch.core.JobParameters
 import org.springframework.batch.core.launch.JobLauncher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import seko.es.join.service.services.constants.JobConstant.Companion.JOB
+import seko.es.join.service.services.constants.JobConstant.Companion.JOB_PARAMS
 
 @Component
 class JoinJob @Autowired constructor(
@@ -14,8 +16,8 @@ class JoinJob @Autowired constructor(
     private val jobLauncher: JobLauncher
 ) : AbstractJoinJob(scheduler) {
     override fun action(context: JobExecutionContext) {
-        val job = context.mergedJobDataMap["job"] as Job
-        val params = context.mergedJobDataMap["jobParams"] as JobParameters
+        val job = context.mergedJobDataMap[JOB] as Job
+        val params = context.mergedJobDataMap[JOB_PARAMS] as JobParameters
         jobLauncher.run(job, params)
     }
 }

@@ -3,7 +3,7 @@ package seko.es.join.service.services
 import org.quartz.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.config.JobConfig
 
 @Service
 class ScheduleService @Autowired constructor(

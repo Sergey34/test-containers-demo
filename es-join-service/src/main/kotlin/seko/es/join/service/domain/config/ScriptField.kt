@@ -1,4 +1,4 @@
-package seko.es.join.service.domain
+package seko.es.join.service.domain.config
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -11,7 +11,8 @@ data class ScriptField(
 ) {
     companion object {
         fun from(config: Map<String, Any>): ScriptField {
-            val script = Script.from(config["script"] as Map<String, String>) ?: throw IllegalStateException()
+            val script = Script.from(config["script"] as Map<String, String>)
+                ?: throw IllegalStateException()
             return ScriptField(config["field_name"] as String, script)
         }
     }

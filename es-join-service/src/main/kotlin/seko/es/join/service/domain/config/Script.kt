@@ -1,4 +1,4 @@
-package seko.es.join.service.domain
+package seko.es.join.service.domain.config
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -22,7 +22,7 @@ data class Script(
         val VALIDATE_SCRIPT = { config: Any? ->
             config == null || (config is List<*> && (config as List<Map<String, Any>>).all {
                 (it["field_name"] as String).isNotBlank()
-                        && (it["script"] as Map<String, String>).keys.containsAll(listOf("lang", "source"))
+                    && (it["script"] as Map<String, String>).keys.containsAll(listOf("lang", "source"))
             })
         }
 

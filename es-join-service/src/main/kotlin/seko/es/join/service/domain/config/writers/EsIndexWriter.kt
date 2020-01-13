@@ -1,4 +1,4 @@
-package seko.es.join.service.domain.writers
+package seko.es.join.service.domain.config.writers
 
 import org.elasticsearch.action.DocWriteRequest
 

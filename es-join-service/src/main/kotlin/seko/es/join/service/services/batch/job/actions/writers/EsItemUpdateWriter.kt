@@ -7,19 +7,18 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.script.Script
 import org.elasticsearch.script.ScriptType
 import org.springframework.batch.item.ItemWriter
-import seko.es.join.service.domain.Configuration
-import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.writers.EsUpdateWriter
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.GlobalConfig
+import seko.es.join.service.domain.config.writers.EsUpdateWriter
+import seko.es.join.service.services.constants.EsConstants.Companion.DOC_TYPE
 
 class EsItemUpdateWriter(
     private val client: RestHighLevelClient,
     writerConfig: Configuration,
     private val globalConfig: GlobalConfig
 ) : ItemWriter<Item> {
-    companion object {
-        const val TYPE: String = "doc"
-    }
+
 
     private val updateWriterConfig: EsUpdateWriter = EsUpdateWriter.from(writerConfig.config)
 
@@ -40,7 +39,7 @@ class EsItemUpdateWriter(
                     .retryOnConflict(updateWriterConfig.retryOnConflict)
                     .index(globalConfig.targetIndex)
                     .doc(esDoc)
-                    .type(TYPE)
+                    .type(DOC_TYPE)
                     .id(doc.content[updateWriterConfig.fieldWithDocId] as String?)
             }
             .forEach { bulkRequest.add(it) }

@@ -1,9 +1,9 @@
-package seko.es.join.service.domain.readers
+package seko.es.join.service.domain.config.readers
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import seko.es.join.service.domain.Script
-import seko.es.join.service.domain.ScriptField
-import seko.es.join.service.domain.readers.Order.Companion.ORDER_CONFIG_VALIDATOR
+import seko.es.join.service.domain.config.Script
+import seko.es.join.service.domain.config.ScriptField
+import seko.es.join.service.domain.config.readers.Order.Companion.ORDER_CONFIG_VALIDATOR
 
 class EsScrollReader(
     @JsonProperty("index")

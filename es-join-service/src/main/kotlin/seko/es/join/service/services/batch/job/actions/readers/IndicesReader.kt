@@ -5,9 +5,9 @@ import org.elasticsearch.action.admin.indices.get.GetIndexResponse
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
-import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.readers.IndicesReader
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.readers.IndicesReader
 
 
 class IndicesReader(
@@ -28,8 +28,6 @@ class IndicesReader(
             val result = get.settings.map {
                 Item(
                     index = it.key,
-                    type = "",
-                    id = "",
                     content = it.value.asGroups.toMutableMap()
                 )
             }

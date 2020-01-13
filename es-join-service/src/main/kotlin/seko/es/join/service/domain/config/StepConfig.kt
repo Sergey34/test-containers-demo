@@ -1,4 +1,4 @@
-package seko.es.join.service.domain
+package seko.es.join.service.domain.config
 
 
 import com.fasterxml.jackson.annotation.JsonProperty

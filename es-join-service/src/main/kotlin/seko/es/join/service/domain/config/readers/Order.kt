@@ -1,4 +1,4 @@
-package seko.es.join.service.domain.readers
+package seko.es.join.service.domain.config.readers
 
 import org.elasticsearch.search.sort.SortOrder
 

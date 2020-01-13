@@ -2,9 +2,9 @@ package seko.es.join.service.services.batch.job.actions.processors
 
 import org.junit.Assert
 import org.junit.jupiter.api.Test
-import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.processors.ProcessorType
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.processors.ProcessorType
 
 internal class EsItemJsProcessorTest {
 

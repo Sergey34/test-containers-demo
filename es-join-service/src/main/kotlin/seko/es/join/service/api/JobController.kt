@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
-import seko.es.join.service.domain.JobConfig
+import seko.es.join.service.domain.config.JobConfig
 import seko.es.join.service.services.BatchJobConfigService
 import seko.es.join.service.services.JobService
 import seko.es.join.service.services.ScheduleService

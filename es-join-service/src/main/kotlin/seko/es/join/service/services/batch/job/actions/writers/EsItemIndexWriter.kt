@@ -5,10 +5,10 @@ import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RequestOptions
 import org.elasticsearch.client.RestHighLevelClient
 import org.springframework.batch.item.ItemWriter
-import seko.es.join.service.domain.Configuration
-import seko.es.join.service.domain.GlobalConfig
 import seko.es.join.service.domain.Item
-import seko.es.join.service.domain.writers.EsIndexWriter
+import seko.es.join.service.domain.config.Configuration
+import seko.es.join.service.domain.config.GlobalConfig
+import seko.es.join.service.domain.config.writers.EsIndexWriter
 
 
 class EsItemIndexWriter(

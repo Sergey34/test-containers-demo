@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: pipeline-service
+    namespace: ${NAMESPACE:seko0716-14-11-28}
   h2:
     console:
       enabled: true

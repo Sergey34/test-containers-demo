@@ -1,8 +1,8 @@
-package seko.es.join.service.domain
+package seko.es.join.service.domain.config
 
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import seko.es.join.service.domain.GlobalConfig.RotationIndexType.NO_ROTATION
+import seko.es.join.service.domain.config.GlobalConfig.RotationIndexType.NO_ROTATION
 
 data class GlobalConfig(
     @JsonProperty("rotation_target_index_date_format")
