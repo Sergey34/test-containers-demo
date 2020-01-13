@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.PrintWriter
 import java.io.StringWriter
+import java.time.Clock
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 
 
 @Component
@@ -24,7 +27,7 @@ class JobPersistStatisticExecutionListener @Autowired constructor(
     override fun afterJob(jobExecution: JobExecution) {
         jobExecution.executionContext.put("stepExecutions", jobExecution.stepExecutions.toEsDocs())
         val esDoc = jobExecution.executionContext.toMap()
-        val source = IndexRequest(".join_history")
+        val source = IndexRequest(".join_history-${LocalDate.now(Clock.systemUTC()).format(ISO_LOCAL_DATE)}")
             .type("doc")
             .source(esDoc)
         restHighLevelClient.index(source, RequestOptions.DEFAULT)

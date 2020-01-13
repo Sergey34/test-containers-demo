@@ -68,7 +68,7 @@
           {
             "type": "FILTER",
             "js_config": {
-              "script": "function filter(item) {return true;}"
+              "script": "function filter(item) {return Math.random() >= 0.5;}"
             }
           }
         ],
