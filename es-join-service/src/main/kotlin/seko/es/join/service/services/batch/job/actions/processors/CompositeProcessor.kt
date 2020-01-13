@@ -12,6 +12,7 @@ class CompositeProcessor constructor(
     private lateinit var jobExecution: JobExecution // add custom field to global job context
 
     override fun process(item: Item): Item? {
+//        jobExecution.executionContext.put("seko", "0716")
         for (processor in processors) {
             processor.process(item) ?: return null
         }
