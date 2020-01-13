@@ -9,6 +9,9 @@ import org.springframework.batch.core.StepExecution
 import org.springframework.batch.item.ExecutionContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.io.PrintWriter
+import java.io.StringWriter
+
 
 @Component
 class JobPersistStatisticExecutionListener @Autowired constructor(
@@ -38,7 +41,7 @@ class JobPersistStatisticExecutionListener @Autowired constructor(
                     "exit_code" to it.exitStatus.exitCode,
                     "exit_description" to it.exitStatus.exitDescription
                 ),
-                "failure_exceptions" to it.failureExceptions,
+                "failure_exceptions" to it.failureExceptions.map { e -> getException(e) },
                 "is_terminate_only" to it.isTerminateOnly,
                 "job_execution_id" to it.jobExecutionId,
                 "last_updated" to it.lastUpdated,
@@ -57,5 +60,13 @@ class JobPersistStatisticExecutionListener @Autowired constructor(
 
     private fun ExecutionContext.toMap(): Map<String, Any> {
         return entrySet().map { it.key to it.value }.toMap()
+    }
+
+    private fun getException(e: Throwable): Map<String, String?> {
+        val sw = StringWriter()
+        val pw = PrintWriter(sw)
+        e.printStackTrace(pw)
+        val stackTrace = sw.toString()
+        return mapOf("stacktrace" to stackTrace, "message" to e.message)
     }
 }

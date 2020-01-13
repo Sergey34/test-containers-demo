@@ -14,13 +14,14 @@ import org.elasticsearch.search.Scroll
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.batch.item.data.AbstractPaginatedDataItemReader
 import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.Item
 import seko.es.join.service.domain.readers.EsScrollReader
 
 class EsScrollItemReader(
     private val restHighLevelClient: RestHighLevelClient,
     readerConfig: Configuration,
     private val chunkSize: Int
-) : AbstractPaginatedDataItemReader<MutableMap<String, Any>>() {
+) : AbstractPaginatedDataItemReader<Item>() {
     private val config = EsScrollReader.from(readerConfig.config)
 
     private var scrollId: String? = null
@@ -50,7 +51,7 @@ class EsScrollItemReader(
         searchRequest.scroll(scroll)
     }
 
-    override fun doPageRead(): Iterator<MutableMap<String, Any>> {
+    override fun doPageRead(): Iterator<Item> {
         val searchResponse: SearchResponse
         if (scrollId == null) {
             searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT)
@@ -62,11 +63,17 @@ class EsScrollItemReader(
             scrollId = searchResponse.scrollId
         }
         val searchHits = searchResponse.hits.hits.map {
-            it.sourceAsMap.apply {
+            val source = it.sourceAsMap.apply {
                 it.fields.values.forEach { field ->
                     put(field.name, field.values)
                 }
             }
+            Item(
+                index = it.index,
+                type = it.type,
+                id = it.id,
+                content = source
+            )
         }
         return searchHits.iterator()
     }

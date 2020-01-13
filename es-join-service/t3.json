@@ -9,21 +9,6 @@
     },
     "steps": [
       {
-        "id": "indices_1",
-        "chunkSize": 5,
-        "reader": {
-          "type": "ES_INDICES",
-          "es_scroll_config": {
-            "index": [
-              "*-2018"
-            ]
-          }
-        },
-        "writer": {
-          "type": "INDEX_DELETE"
-        }
-      },
-      {
         "id": "errors",
         "chunkSize": 5,
         "reader": {
@@ -77,13 +62,13 @@
           {
             "type": "JS",
             "js_config": {
-              "script": "function process(source) {source.qweqweq = 12312312;return source;}"
+              "script": "function process(item) {item.content.qweqweq = 12312312;return item;}"
             }
           },
           {
             "type": "FILTER",
             "js_config": {
-              "script": "function filter(source) {return true;}"
+              "script": "function filter(item) {return true;}"
             }
           }
         ],
@@ -95,6 +80,21 @@
             "target_field": null,
             "field_with_doc_id": "id"
           }
+        }
+      },
+      {
+        "id": "indices_1",
+        "chunkSize": 5,
+        "reader": {
+          "type": "ES_INDICES",
+          "es_scroll_config": {
+            "index": [
+              "*-2018"
+            ]
+          }
+        },
+        "writer": {
+          "type": "INDEX_DELETE"
         }
       }
     ]

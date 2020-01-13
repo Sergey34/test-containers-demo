@@ -8,16 +8,17 @@ import org.elasticsearch.script.mustache.MultiSearchTemplateRequest
 import org.elasticsearch.script.mustache.SearchTemplateRequest
 import org.springframework.batch.item.ItemProcessor
 import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.Item
 import seko.es.join.service.domain.processors.JoinProcessor
 import seko.es.join.service.domain.processors.MultiJoinProcessor
 
 class EsMultiItemJoinProcessor(
     processor: Configuration,
     private val restHighLevelClient: RestHighLevelClient
-) : ItemProcessor<MutableMap<String, Any>, Map<String, Any>> {
+) : ItemProcessor<Item, Item> {
     private val joinProcessorConfig: MultiJoinProcessor = MultiJoinProcessor.from(processor.config)
 
-    override fun process(item: MutableMap<String, Any>): Map<String, Any> {
+    override fun process(item: Item): Item {
         val requests = MultiSearchTemplateRequest()
 
         val configs: List<JoinProcessor> = joinProcessorConfig.configs
@@ -27,7 +28,7 @@ class EsMultiItemJoinProcessor(
             request.request = searchRequest
             request.scriptType = ScriptType.INLINE
             request.script = jp.query
-            request.scriptParams = item.filterKeys { it in jp.params }
+            request.scriptParams = item.content.filterKeys { it in jp.params }
             requests.add(request)
         }
 
@@ -35,7 +36,7 @@ class EsMultiItemJoinProcessor(
 
         response.responses.forEachIndexed { index, resp ->
             val doc = resp.response.response.hits.hits.map { it.sourceAsMap }
-            item[configs[index].target_field] = doc
+            item.content[configs[index].target_field] = doc
         }
         return item
     }

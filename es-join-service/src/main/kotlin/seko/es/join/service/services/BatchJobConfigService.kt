@@ -15,6 +15,7 @@ import org.springframework.batch.item.ItemWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import seko.es.join.service.domain.GlobalConfig
+import seko.es.join.service.domain.Item
 import seko.es.join.service.domain.JobConfig
 import seko.es.join.service.domain.StepConfig
 import seko.es.join.service.domain.processors.ProcessorType
@@ -24,7 +25,8 @@ import seko.es.join.service.repository.EsRepository
 import seko.es.join.service.services.batch.job.actions.processors.*
 import seko.es.join.service.services.batch.job.actions.readers.EsScrollItemReader
 import seko.es.join.service.services.batch.job.actions.readers.IndicesReader
-import seko.es.join.service.services.batch.job.actions.writers.DeleteIndices
+import seko.es.join.service.services.batch.job.actions.writers.DeleteDocumentWriter
+import seko.es.join.service.services.batch.job.actions.writers.DeleteIndicesWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.batch.job.listeners.JobPersistStatisticExecutionListener
@@ -70,7 +72,7 @@ class BatchJobConfigService @Autowired constructor(
     private fun createSteps(jobConfig: JobConfig): List<TaskletStep> {
         return jobConfig.steps.map {
             stepBuilderFactory[it.id]
-                .chunk<MutableMap<String, Any>, Map<String, Any>>(it.chunkSize)
+                .chunk<Item, Item>(it.chunkSize)
                 .reader(createReader(it))
                 .apply {
                     createProcessor(it)?.let { p -> processor(p) }
@@ -79,18 +81,19 @@ class BatchJobConfigService @Autowired constructor(
         }
     }
 
-    private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): ItemWriter<Map<String, Any>> {
+    private fun createWriter(config: StepConfig, globalConfig: GlobalConfig): ItemWriter<Item> {
         val writerConfig = config.writer
         return when (WriterType.valueOf(writerConfig.type)) {
             WriterType.UPDATE -> EsItemUpdateWriter(restHighLevelClient, writerConfig, globalConfig)
             WriterType.INDEX -> EsItemIndexWriter(restHighLevelClient, writerConfig, globalConfig)
-            WriterType.INDEX_DELETE -> DeleteIndices(restHighLevelClient)
+            WriterType.INDEX_DELETE -> DeleteIndicesWriter(restHighLevelClient)
+            WriterType.DELETE_DOCUMENTS -> DeleteDocumentWriter(restHighLevelClient)
             WriterType.UPDATE_BY_QUERY -> TODO()
             WriterType.UPDATE_BY_SCRIPT -> TODO()
         }
     }
 
-    private fun createProcessor(config: StepConfig): ItemProcessor<MutableMap<String, Any>, Map<String, Any>>? {
+    private fun createProcessor(config: StepConfig): ItemProcessor<Item, Item?>? {
         return config.processors?.map {
             when (ProcessorType.valueOf(it.type)) {
                 ProcessorType.JS -> EsItemJsProcessor(it)
@@ -101,7 +104,7 @@ class BatchJobConfigService @Autowired constructor(
         }?.let { CompositeProcessor(it) }
     }
 
-    private fun createReader(config: StepConfig): ItemReader<MutableMap<String, Any>> {
+    private fun createReader(config: StepConfig): ItemReader<Item> {
         val readerConfig = config.reader
         return when (ReaderType.valueOf(readerConfig.type)) {
             ReaderType.ES_SCROLL -> {

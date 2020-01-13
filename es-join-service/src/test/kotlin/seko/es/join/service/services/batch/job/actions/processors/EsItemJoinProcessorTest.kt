@@ -4,6 +4,7 @@ import com.seko.testcontainers.es.EsTestContainer
 import org.junit.ClassRule
 import org.junit.jupiter.api.Test
 import seko.es.join.service.domain.Configuration
+import seko.es.join.service.domain.Item
 import seko.es.join.service.domain.processors.ProcessorType
 
 internal class EsItemJoinProcessorTest {
@@ -20,6 +21,6 @@ internal class EsItemJoinProcessorTest {
             "target_field" to "qwe",
             "params" to "id"
         ))
-        val process = EsItemJoinProcessor(processor, client).process(mutableMapOf("id" to "1"))
+        val process = EsItemJoinProcessor(processor, client).process(Item("", "", "", mutableMapOf("id" to "1")))
     }
 }

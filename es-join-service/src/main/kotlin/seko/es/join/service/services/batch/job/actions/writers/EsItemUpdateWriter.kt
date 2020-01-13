@@ -9,28 +9,31 @@ import org.elasticsearch.script.ScriptType
 import org.springframework.batch.item.ItemWriter
 import seko.es.join.service.domain.Configuration
 import seko.es.join.service.domain.GlobalConfig
+import seko.es.join.service.domain.Item
 import seko.es.join.service.domain.writers.EsUpdateWriter
 
 class EsItemUpdateWriter(
     private val client: RestHighLevelClient,
     writerConfig: Configuration,
     private val globalConfig: GlobalConfig
-) : ItemWriter<Map<String, Any>> {
+) : ItemWriter<Item> {
     companion object {
         const val TYPE: String = "doc"
     }
 
     private val updateWriterConfig: EsUpdateWriter = EsUpdateWriter.from(writerConfig.config)
 
-    override fun write(items: MutableList<out Map<String, Any>>) {
+    override fun write(items: MutableList<out Item>) {
         val bulkRequest = BulkRequest()
         items
             .map { doc ->
                 val script = updateWriterConfig.script?.let {
                     Script(ScriptType.INLINE, Script.DEFAULT_SCRIPT_LANG, it.source, it.params)
                 }
-                val esDoc = (updateWriterConfig.targetField?.let { mapOf(updateWriterConfig.targetField to doc) }
-                    ?: doc)
+                val esDoc = updateWriterConfig.targetField
+                    ?.let {
+                        mapOf(updateWriterConfig.targetField to doc)
+                    } ?: doc.content
                 UpdateRequest()
                     .docAsUpsert(updateWriterConfig.docAsUpsert)
                     .script(script)
@@ -38,7 +41,7 @@ class EsItemUpdateWriter(
                     .index(globalConfig.targetIndex)
                     .doc(esDoc)
                     .type(TYPE)
-                    .id(doc[updateWriterConfig.fieldWithDocId] as String?)
+                    .id(doc.content[updateWriterConfig.fieldWithDocId] as String?)
             }
             .forEach { bulkRequest.add(it) }
 
