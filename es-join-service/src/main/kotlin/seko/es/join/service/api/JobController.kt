@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import seko.es.join.service.domain.config.JobConfig
 import seko.es.join.service.services.BatchJobConfigService
-import seko.es.join.service.services.JobService
+import seko.es.join.service.services.QuartzJobService
 import seko.es.join.service.services.ScheduleService
 
 @RestController
 class JobController @Autowired constructor(
-    private val jobService: JobService,
+    private val quartzJobService: QuartzJobService,
     private val batchJobConfigService: BatchJobConfigService,
     private val scheduleService: ScheduleService
 ) {
@@ -29,11 +29,11 @@ class JobController @Autowired constructor(
 
     @PostMapping("/job")
     fun addJob(jobConfig: JobConfig): RestStatus {
-        return jobService.addJob(jobConfig)
+        return quartzJobService.addJob(jobConfig)
     }
 
     @PostMapping("/job/{jobId}")
     fun runJob(@PathVariable jobId: String) {
-        jobService.runJob(jobId)
+        quartzJobService.runJob(jobId)
     }
 }

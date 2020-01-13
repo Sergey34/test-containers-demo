@@ -17,9 +17,7 @@ class EsItemUpdateWriter(
     private val client: RestHighLevelClient,
     writerConfig: Configuration,
     private val globalConfig: GlobalConfig
-) : ItemWriter<Item> {
-
-
+) : ItemWriter<Item>, BulkValidatable {
     private val updateWriterConfig: EsUpdateWriter = EsUpdateWriter.from(writerConfig.config)
 
     override fun write(items: MutableList<out Item>) {
@@ -44,7 +42,9 @@ class EsItemUpdateWriter(
             }
             .forEach { bulkRequest.add(it) }
 
-        val bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT)
+        client.bulk(bulkRequest, RequestOptions.DEFAULT)
+            .apply {
+                validate(this)
+            }
     }
-
 }

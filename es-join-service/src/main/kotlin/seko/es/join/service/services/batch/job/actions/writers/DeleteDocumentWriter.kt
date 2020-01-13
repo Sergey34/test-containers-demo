@@ -9,7 +9,7 @@ import seko.es.join.service.domain.Item
 
 class DeleteDocumentWriter(
     private val client: RestHighLevelClient
-) : ItemWriter<Item> {
+) : ItemWriter<Item>, BulkValidatable {
 
     override fun write(items: MutableList<out Item>) {
         val bulkRequest = BulkRequest()
@@ -19,6 +19,9 @@ class DeleteDocumentWriter(
             }
             .forEach { bulkRequest.add(it) }
 
-        val bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT)
+        client.bulk(bulkRequest, RequestOptions.DEFAULT)
+            .apply {
+                validate(this)
+            }
     }
 }

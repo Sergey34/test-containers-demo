@@ -21,7 +21,7 @@ import seko.es.join.service.services.quartz.jobs.JoinJob
 
 
 @Service
-class JobService @Autowired constructor(
+class QuartzJobService @Autowired constructor(
     private val scheduleService: ScheduleService,
     private val batchJobConfigService: BatchJobConfigService,
     private val esRepository: EsRepository,

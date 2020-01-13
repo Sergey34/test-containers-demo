@@ -9,6 +9,7 @@ import org.springframework.batch.core.StepExecution
 import org.springframework.batch.item.ExecutionContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import seko.es.join.service.configuration.getException
 import seko.es.join.service.services.constants.EsConstants.Companion.DOC_TYPE
 import seko.es.join.service.services.constants.EsConstants.Companion.HISTORY_INDEX
 import seko.es.join.service.services.constants.HistoryFields.Companion.COMMIT_COUNT
@@ -22,12 +23,10 @@ import seko.es.join.service.services.constants.HistoryFields.Companion.FILTER_CO
 import seko.es.join.service.services.constants.HistoryFields.Companion.IS_TERMINATE_ONLY
 import seko.es.join.service.services.constants.HistoryFields.Companion.JOB_EXECUTION_ID
 import seko.es.join.service.services.constants.HistoryFields.Companion.LAST_UPDATED
-import seko.es.join.service.services.constants.HistoryFields.Companion.MESSAGE
 import seko.es.join.service.services.constants.HistoryFields.Companion.PROCESS_SKIP_COUNT
 import seko.es.join.service.services.constants.HistoryFields.Companion.READ_COUNT
 import seko.es.join.service.services.constants.HistoryFields.Companion.READ_SKIP_COUNT
 import seko.es.join.service.services.constants.HistoryFields.Companion.ROLLBACK_COUNT
-import seko.es.join.service.services.constants.HistoryFields.Companion.STACKTRACE
 import seko.es.join.service.services.constants.HistoryFields.Companion.START_TIME
 import seko.es.join.service.services.constants.HistoryFields.Companion.STATUS
 import seko.es.join.service.services.constants.HistoryFields.Companion.STEP_EXECUTIONS
@@ -35,12 +34,9 @@ import seko.es.join.service.services.constants.HistoryFields.Companion.STEP_NAME
 import seko.es.join.service.services.constants.HistoryFields.Companion.SUMMARY
 import seko.es.join.service.services.constants.HistoryFields.Companion.WRITE_COUNT
 import seko.es.join.service.services.constants.HistoryFields.Companion.WRITE_SKIP_COUNT
-import java.io.PrintWriter
-import java.io.StringWriter
 import java.time.Clock
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-
 
 @Component
 class JobPersistStatisticExecutionListener @Autowired constructor(
@@ -71,7 +67,7 @@ class JobPersistStatisticExecutionListener @Autowired constructor(
                     EXIT_CODE to it.exitStatus.exitCode,
                     EXIT_DESCRIPTION to it.exitStatus.exitDescription
                 ),
-                FAILURE_EXCEPTIONS to it.failureExceptions.map { e -> getException(e) },
+                FAILURE_EXCEPTIONS to it.failureExceptions.map { e -> e.getException() },
                 IS_TERMINATE_ONLY to it.isTerminateOnly,
                 JOB_EXECUTION_ID to it.jobExecutionId,
                 LAST_UPDATED to it.lastUpdated,
@@ -91,12 +87,6 @@ class JobPersistStatisticExecutionListener @Autowired constructor(
     private fun ExecutionContext.toMap(): Map<String, Any> {
         return entrySet().map { it.key to it.value }.toMap()
     }
-
-    private fun getException(e: Throwable): Map<String, String?> {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        e.printStackTrace(pw)
-        val stackTrace = sw.toString()
-        return mapOf(STACKTRACE to stackTrace, MESSAGE to e.message)
-    }
 }
+
+
