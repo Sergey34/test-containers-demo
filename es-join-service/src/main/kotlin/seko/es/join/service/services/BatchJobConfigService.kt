@@ -1,5 +1,6 @@
 package seko.es.join.service.services
 
+import com.netcracker.platform.otrk.zookeeper.registrar.starter.service.StatusProviderService
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.search.slice.SliceBuilder
 import org.springframework.batch.core.Job
@@ -30,6 +31,7 @@ import seko.es.join.service.services.batch.job.actions.writers.DeleteIndicesWrit
 import seko.es.join.service.services.batch.job.actions.writers.EsItemIndexWriter
 import seko.es.join.service.services.batch.job.actions.writers.EsItemUpdateWriter
 import seko.es.join.service.services.batch.job.listeners.JobPersistStatisticExecutionListener
+import seko.es.join.service.services.constants.JobConstant.Companion.JOB_ID
 
 @Service
 class BatchJobConfigService @Autowired constructor(
@@ -37,7 +39,8 @@ class BatchJobConfigService @Autowired constructor(
     private val restHighLevelClient: RestHighLevelClient,
     private val jobPersistStatisticExecutionListener: JobPersistStatisticExecutionListener,
     private val jobs: JobBuilderFactory,
-    private val esRepository: EsRepository
+    private val esRepository: EsRepository,
+    private val statusProviderService: StatusProviderService
 ) {
     private final lateinit var configs: List<JobConfig>
 
@@ -49,11 +52,14 @@ class BatchJobConfigService @Autowired constructor(
     }
 
     private fun getSliceConfig(): SliceBuilder {
-        return SliceBuilder(0, 1)
+        return statusProviderService.provideStatus()
+            .let {
+                SliceBuilder(it.payload.sliceId, it.payload.sliceMax)
+            }
     }
 
     fun createJobParams(jobConfig: JobConfig): JobParametersBuilder {
-        return JobParametersBuilder().addString("JobID", jobConfig.jobId)
+        return JobParametersBuilder().addString(JOB_ID, jobConfig.jobId)
     }
 
     fun getJob(jobConfig: JobConfig): Job {

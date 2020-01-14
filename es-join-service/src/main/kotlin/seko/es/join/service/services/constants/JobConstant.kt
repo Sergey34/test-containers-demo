@@ -7,5 +7,6 @@ class JobConstant {
         const val JOB_PARAMS_BUILDER = "jobParamsBuilder"
         const val RUN_TIME = "RunTime"
         const val CONFIG = "config"
+        const val JOB_ID = "JobID"
     }
 }

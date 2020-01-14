@@ -30,3 +30,13 @@ management:
       exposure:
         include: '*'
 #http://localhost:8080/actuator/metrics
+
+server:
+  port: 0
+  sslPort:
+
+application:
+  zookeeper:
+    connectString: devdocker005cn:2181
+    sessionTimeout: 60000
+    root-node: /service/pipeline
